@@ -5,7 +5,7 @@
  •	Gave weights to the different words and analyzed different features in a sentence using graphlab create in python (a software provided by dato)
  
  
- ##Image Classification
+##Image Classification
  You’ve probably heard that Deep Learning is making news across the world as one of the most promising techniques in machine learning. Every industry is dedicating resources to unlock the deep learning potential, including for tasks such as image tagging, object recognition, speech recognition, and text analysis.
 
 In our final case study, searching for images, this will be on how layers of neural networks provide very descriptive (non-linear) features that provide impressive performance in image classification and retrieval tasks. You will then construct deep features, a transfer learning technique that allows you to use deep learning very easily, even when you have little data to train the model.
