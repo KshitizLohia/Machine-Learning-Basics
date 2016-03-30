@@ -1,0 +1,1493 @@
+<!doctype html><!-- start coded_template: id:3559327832 path:generated_layouts/3559327822.html --><!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]--><!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en">        <![endif]--><!--[if IE 8]>    <html class="no-js lt-ie9" lang="en">               <![endif]--><!--[if gt IE 8]><!--><html class="no-js" lang="en"><!--<![endif]--><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="author" content="Alice Zheng">
+    <meta name="description" content="How to conduct online tests of machine learning models, the pitfalls of A/B testing, and a promising alternative: multi-armed bandits.">
+    <meta name="generator" content="HubSpot">
+    <title>How to Evaluate Machine Learning Models: The Pitfalls of A/B Testing</title>
+    <link rel="shortcut icon" href="//cdn2.hubspot.net/hub/426799/file-1651500293-ico/layout/favicon.ico?t=1458695042709">
+
+    
+    
+    <script type="text/javascript" src="//static.hsstatic.net/jquery-libs/static-1.1/jquery/jquery-1.7.1.js"></script>
+    <script type="text/javascript">hsjQuery = window['jQuery']</script>
+    <link href="//static.hsstatic.net/content_shared_assets/static-1.4002/css/public_common.css" rel="stylesheet">
+    <meta property="og:description" content="How to conduct online tests of machine learning models, the pitfalls of A/B testing, and a promising alternative: multi-armed bandits.">
+    <meta property="og:title" content="How to Evaluate Machine Learning Models: The Pitfalls of A/B Testing">
+    <meta name="twitter:description" content="How to conduct online tests of machine learning models, the pitfalls of A/B testing, and a promising alternative: multi-armed bandits.">
+    <meta name="twitter:title" content="How to Evaluate Machine Learning Models: The Pitfalls of A/B Testing">
+
+    
+    
+
+
+    <!--[if lt IE 9]>
+    <script src="https://static.hsstatic.net/content_shared_assets/static-1.4002/js/css3-mediaqueries.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+<meta property="og:image" content="http://cdn2.hubspot.net/hubfs/426799/images/pitfalls.jpeg#keepProtocol">
+<meta name="twitter:image:src" content="http://cdn2.hubspot.net/hubfs/426799/images/pitfalls.jpeg#keepProtocol">
+<meta name="twitter:creator" content="@RainyData">
+
+<link rel="canonical" href="http://blog.dato.com/how-to-evaluate-machine-learning-models-the-pitfalls-of-ab-testing">
+
+<meta property="og:type" content="article">
+<link rel="alternate" type="application/rss+xml" href="http://blog.dato.com/rss.xml">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:domain" content="blog.dato.com">
+<meta name="twitter:site" content="@datoinc">
+<script src="//platform.linkedin.com/in.js" type="text/javascript">
+    lang: en_US
+</script>
+
+<link href="//cdn2.hubspot.net/hub/-1/hub_generated/style_manager/1431123893544/hubspot_default/shared/responsive/layout.min.css" rel="stylesheet">
+
+<link rel="stylesheet" href="//cdn2.hubspot.net/hub/426799/hub_generated/style_manager/1418766348644/custom/page/css/setup-style.min.css">
+
+
+    <!-- The style tag has been deprecated. Attached stylesheets are included in the required_head_tags page variable. -->
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/ico" href="http://dato.com/favicon.ico">
+
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+<link href="http://dato.com/styles/GraphLab.css" rel="stylesheet">
+
+<script src="https://dato.com/files/vendor/fastclick.js"></script>
+
+<script type="text/javascript" src="//use.typekit.net/hzm6svm.js"></script>
+<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react-with-addons.min.js"></script>
+
+
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+MathJax.Hub.Config({
+  "tex2jax": { inlineMath: [ [ '$', '$' ] ] }
+});
+</script>
+
+<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/default.min.css">
+<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <script type="text/javascript">
+  // attach handlers when document is ready
+  $( function() {
+    var $menuRight = $('#menuRight'),
+    $pushRightButton = $('#showRightPush'),
+    $body = $('body'),
+    $searchToggler = $('#datoSearchToggler'),
+    $searchForm = $('#dato-search');
+
+    FastClick.attach(document.getElementById('menuRight'));
+
+    function togglePushMenu(evt) {
+      $pushRightButton.toggleClass('active' );
+      $body.toggleClass('cbp-spmenu-push-toleft' );
+      $menuRight.toggleClass('cbp-spmenu-open' );
+      evt.stopPropagation();
+    }
+
+    function closePushMenu(evt) {
+      if ($pushRightButton.hasClass('active')) {
+        togglePushMenu(evt);
+      }
+    }
+
+    //toggle the push menu with the button
+    $pushRightButton.on('click', togglePushMenu);
+
+    $('.nav-pushmenu-menuitem').on('click', function(evt) {
+
+      evt.stopPropagation();
+
+      var $open = $(this).siblings('.open');
+      $open.removeClass('open');
+      $open.find('.nav-arrow').removeClass('nav-rotate');
+
+      //toggle current selection
+      $(this).toggleClass('open');
+      $(this).find('.nav-arrow').toggleClass('nav-rotate');
+    });
+
+    $('body').on('click', closePushMenu);
+
+    //only use window resize to remove push menu, not add it.
+    $(window).on('resize', closePushMenu );
+
+    //attach search form slide handlers
+    $searchToggler.on('click', function() {
+      $searchForm.toggleClass('open');
+      if ($searchForm.hasClass('open')) {
+        $searchForm.slideDown();
+        return;
+      }
+      $searchForm.slideUp();
+      return;
+    });
+  });
+  </script>
+
+<script src="https://dato.com/js/hs-metrics.js"></script>
+
+<link rel="stylesheet" href="//s3-us-west-2.amazonaws.com/dato-js/thebe.css" type="text/css">
+    
+
+
+</head>
+<body class="   hs-content-id-2929146181 hs-blog-post hs-content-path-how-to-evaluate-machine-learning-models-the-pitfal hs-content-name-how-to-evaluate-machine-learning-models-the-pitfal hs-blog-name-dato-blog hs-blog-id-1363301641" style="">
+    <div class="header-container-wrapper">
+    <div class="header-container container-fluid">
+
+        <div class="row-fluid-wrapper row-depth-1 row-number-1 ">
+        <div class="row-fluid ">
+            <div class="span12 widget-span widget-type-raw_html " style="" data-widget-type="raw_html" data-x="0" data-w="12">
+                <div class="cell-wrapper layout-widget-wrapper">
+                    <span id="hs_cos_wrapper_module_1421087204510872" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_raw_html" style="" data-hs-cos-general-type="widget" data-hs-cos-type="raw_html"><header style="height: 102px; margin-bottom: 20px;">
+<table style="width: 100%; height: 5px;" border="0" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td width="20%" bgcolor="#B0007F"></td>
+<td width="20%" bgcolor="#0A8CC4"></td>
+<td width="20%" bgcolor="#85BD00"></td>
+<td width="20%" bgcolor="#FF5500"></td>
+<td width="20%" bgcolor="#5E5555"></td>
+</tr>
+</tbody>
+</table>
+<div class="container">
+<div class="row">
+<div class="col-xs-12 visible-xs">
+<a rel="home" href="https://dato.com" style="display: inline-block; vertical-align: top; margin-top: 15px;">
+<div id="dato-logo"></div>
+</a>
+<nav class="navbar-default pull-right">
+<button type="button" id="showRightPush" style="display: inline-block; vertical-align: top;" class="navbar-toggle">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+</nav>
+</div>
+<div class="col-xs-12 hidden-xs">
+<a rel="home" href="https://dato.com" style="display: inline-block; vertical-align: top; margin-top: 15px;">
+<div id="dato-logo"></div>
+</a>
+<nav style="display: inline-block; margin-top: 56px">
+<ul class="list-inline">
+<li>
+<a href="https://dato.com/products/">
+Products
+</a>
+<div class="dropdown">
+<div class="space"></div>
+<div class="arrow"></div>
+<ul class="dropdown-menu" role="menu">
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/products/create/">GraphLab Create
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/download/">Download
+</a>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<a href="https://dato.com/solutions/use-cases.html">
+Solutions
+</a>
+<div class="dropdown">
+<div class="space"></div>
+<div class="arrow"></div>
+<ul class="dropdown-menu" role="menu">
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/solutions/industries.html">By Industry
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/solutions/use-cases.html">By Use Case
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/solutions/algorithms.html">By Algorithm
+</a>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<a href="https://dato.com/learn/">
+Learn
+</a>
+<div class="dropdown">
+<div class="space"></div>
+<div class="arrow"></div>
+<ul class="dropdown-menu" role="menu">
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/learn/gallery/">Gallery
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/learn/how-to/">How-To
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/learn/translator/">Translator
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/products/create/docs/">API Documentation
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/learn/userguide/">User Guide
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://github.com/dato-code/GraphLab-Create-SDK">C++ SDK (beta)
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="http://forum.dato.com">Forum
+</a>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<a href="https://dato.com/events/">
+Events
+</a>
+<div class="dropdown">
+<div class="space"></div>
+<div class="arrow"></div>
+<ul class="dropdown-menu" role="menu">
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/events/">Upcoming Events
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="http://conf.dato.com">Conference 2015
+</a>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<a href="https://dato.com/company/press/">
+Company
+</a>
+<div class="dropdown">
+<div class="space"></div>
+<div class="arrow"></div>
+<ul class="dropdown-menu" role="menu">
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/company/press/">Press
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/company/team/">Team
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/company/team/investors.html">Investors
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/company/careers/">Careers
+</a>
+</li>
+<li role="presentation" class="divider"></li>
+<li>
+<a role="menuitem" tabindex="-1" href="https://dato.com/company/contact.html">Contact Us
+</a>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<a href="http://blog.dato.com">
+Blog
+</a>
+</li>
+</ul>
+</nav>
+<div class="pull-right dato-buy-download-cluster">
+<div class="dato-buy-contact">
+<a href="https://dato.com/buy/">Buy</a>
+<a class="pull-right" href="https://dato.com/company/contact.html">Contact Us</a>
+</div>
+<div>
+<a class="btn btn-primary" href="https://dato.com/download/">Download</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right" id="menuRight">
+<h3>Menu</h3>
+<div class="nav-pushmenu-menuitem">
+<a href="javascript:void(0)">
+Products
+<span class="nav-arrow fa fa-chevron-right">
+</span></a>
+<ul class="nav-pushmenu-submenu">
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/products/create/">GraphLab Create
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/download/">Download
+</a>
+</li>
+</ul>
+</div>
+<div class="nav-pushmenu-menuitem">
+<a href="javascript:void(0)">
+Solutions
+<span class="nav-arrow fa fa-chevron-right">
+</span></a>
+<ul class="nav-pushmenu-submenu">
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/solutions/industries.html">By Industry
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/solutions/use-cases.html">By Use Case
+</a>
+</li>
+</ul>
+</div>
+<div class="nav-pushmenu-menuitem">
+<a href="javascript:void(0)">
+Learn
+<span class="nav-arrow fa fa-chevron-right">
+</span></a>
+<ul class="nav-pushmenu-submenu">
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/learn/gallery/">Gallery
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/learn/how-to/">How-To
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/learn/translator/">Translator
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/products/create/docs/">API Documentation
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/learn/userguide/">User Guide
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://github.com/dato-code/GraphLab-Create-SDK">C++ SDK (beta)
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="http://forum.dato.com">Forum
+</a>
+</li>
+</ul>
+</div>
+<div class="nav-pushmenu-menuitem">
+<a href="javascript:void(0)">
+Events
+<span class="nav-arrow fa fa-chevron-right">
+</span></a>
+<ul class="nav-pushmenu-submenu">
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/events/">Upcoming Events
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="http://conf.dato.com">Conference 2015
+</a>
+</li>
+</ul>
+</div>
+<div class="nav-pushmenu-menuitem">
+<a href="javascript:void(0)">
+Company
+<span class="nav-arrow fa fa-chevron-right">
+</span></a>
+<ul class="nav-pushmenu-submenu">
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/company/press/">Press
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/company/team/">Team
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/company/team/investors.html">Investors
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/company/careers/">Careers
+</a>
+</li>
+<li role="presentation">
+<a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/company/contact.html">Contact Us
+</a>
+</li>
+</ul>
+</div>
+<div class="nav-pushmenu-menuitem">
+<a href="http://blog.dato.com">
+Blog
+<span class="nav-arrow fa fa-chevron-right">
+</span></a>
+<ul class="nav-pushmenu-submenu">
+</ul>
+</div>
+</nav></span>
+                </div><!--end layout-widget-wrapper -->
+            </div><!--end widget-span -->
+        </div><!--end row-->
+        </div><!--end row-wrapper -->
+
+    </div><!--end header -->
+</div><!--end header wrapper -->
+
+<div class="body-container-wrapper">
+    <div class="body-container container-fluid">
+
+        <div class="row-fluid-wrapper row-depth-1 row-number-1 ">
+        <div class="row-fluid ">
+            <div class="span12 widget-span widget-type-raw_jinja hs-blog-header" style="" data-widget-type="raw_jinja" data-x="0" data-w="12">
+<p><a href="http://dato.com/">Home</a>      /      <a href="http://blog.dato.com/">Dato Blog</a></p></div><!--end widget-span -->
+
+        </div><!--end row-->
+        </div><!--end row-wrapper -->
+        <div class="row-fluid-wrapper row-depth-1 row-number-2 ">
+        <div class="row-fluid ">
+            <div class="span8 widget-span widget-type-cell " style="" data-widget-type="cell" data-x="0" data-w="8">
+
+                <div class="row-fluid-wrapper row-depth-1 row-number-3 ">
+                <div class="row-fluid ">
+                    <div class="span12 widget-span widget-type-blog_content " style="" data-widget-type="blog_content" data-x="0" data-w="12">
+<div class="blog-section">
+    <div class="blog-post-wrapper cell-wrapper">
+                <div class="section post-header">
+            <h1>
+                <span id="hs_cos_wrapper_name" class="hs_cos_wrapper hs_cos_wrapper_meta_field hs_cos_wrapper_type_text" style="" data-hs-cos-general-type="meta_field" data-hs-cos-type="text">How to Evaluate Machine Learning Models: The Pitfalls of A/B Testing</span>
+            </h1>
+            <p id="hubspot-author_data" class="hubspot-editable" data-hubspot-form-id="author_data" data-hubspot-name="Blog Author">
+                 </p><div class="hs-author-avatar"> <img height="60 px" src="//cdn2.hubspot.net/hub/426799/file-2052592173-jpg/alice.jpg?t=1458695042709"> </div>     
+                    <span class="hs-author-label">Posted by</span>
+                    
+                        <a class="author-link" href="http://blog.dato.com/author/alice-zheng">Alice Zheng</a> on Jun 10, 2015 7:00:00 AM
+                       <!-- 
+                            <div class="hs-author-social-section">
+                                <span class="hs-author-social-label">Find me on:</span>
+                                <div class="hs-author-social-links">
+                                    
+                                    
+                                        <a href="https://www.linkedin.com/pub/alice-zheng/82/994/46b" target="_blank" class="hs-author-social-link hs-social-linkedin">LinkedIn</a>
+                                    
+                                    
+                                        <a href="https://twitter.com/RainyData" target="_blank" class="hs-author-social-link hs-social-twitter">Twitter </a>
+                                    
+                                    
+                                </div>
+                            </div>
+                         -->
+                    
+            <p></p>
+        </div>
+            <span id="hs_cos_wrapper_blog_social_sharing" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_blog_social_sharing" style="" data-hs-cos-general-type="widget" data-hs-cos-type="blog_social_sharing">
+<div class="hs-blog-social-share">
+    <ul class="hs-blog-social-share-list">
+        
+        <li class="hs-blog-social-share-item hs-blog-social-share-item-twitter">
+            <!-- Twitter social share -->
+            <a href="https://twitter.com/share" class="twitter-share-button" data-lang="en" data-url="http://blog.dato.com/how-to-evaluate-machine-learning-models-the-pitfalls-of-ab-testing" data-size="medium" data-text="How to Evaluate Machine Learning Models: The Pitfalls of A/B Testing">Tweet</a>
+        </li>
+        
+
+        
+        <li class="hs-blog-social-share-item hs-blog-social-share-item-linkedin">
+            <!-- LinkedIn social share -->
+            <script type="IN/Share" data-url="http://blog.dato.com/how-to-evaluate-machine-learning-models-the-pitfalls-of-ab-testing" data-showzero="true" data-counter="right"></script>
+        </li>
+        
+
+        
+        <li class="hs-blog-social-share-item hs-blog-social-share-item-facebook">
+            <!-- Facebook share -->
+            <div class="fb-like" data-href="http://blog.dato.com/how-to-evaluate-machine-learning-models-the-pitfalls-of-ab-testing" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true" data-width="120"></div>
+        </li>
+        
+
+        
+        <li class="hs-blog-social-share-item hs-blog-social-share-item-google-plus">
+            <!-- Google +1 -->
+            <div class="g-plusone" data-size="medium" data-href="http://blog.dato.com/how-to-evaluate-machine-learning-models-the-pitfalls-of-ab-testing"></div>
+        </li>
+        
+    </ul>
+ </div>
+
+</span>
+        
+             <p id="hubspot-topic_data"> Topics:
+                
+                    <a class="topic-link" href="http://blog.dato.com/topic/machine-learning-primer">Machine Learning Primer</a>,
+                
+                    <a class="topic-link" href="http://blog.dato.com/topic/machine-learning-concepts">Machine Learning Concepts</a>,
+                
+                    <a class="topic-link" href="http://blog.dato.com/topic/data-science">Data Science</a>
+                
+             </p>
+        
+        <div class="section post-body"><p></p><p></p>
+            <span id="hs_cos_wrapper_post_body" class="hs_cos_wrapper hs_cos_wrapper_meta_field hs_cos_wrapper_type_rich_text" style="" data-hs-cos-general-type="meta_field" data-hs-cos-type="rich_text"><p><em>This is the last post of a five-part blog series on evaluating machine learning.</em></p>
+<p>In this blog series, I’ve been mainly focusing on the basic concepts in evaluating machine learning. The focus for this last post in the series is not just the basic concepts but also best practice tips. Dato’s GraphLab Create offers much of the basic functionality in model evaluation and hyperparameter tuning. In upcoming releases, we will also add functionalities for managing and monitoring deployed models, including online testing. A/B testing is a widespread practice today. But a lot can go wrong in setting it up and interpreting the results. We’ll discuss important questions to consider when doing A/B testing, followed by an overview of a promising alternative: multi-armed bandits.</p>
+<p>Recall that there are roughly two regimes for machine learning evaluation: offline and online. <em>Offline testing</em> happens during the prototyping phase where one tries out different features, models, and hyperparameters. It’s an iterative process of many rounds of evaluation against a chosen baseline on a set of chosen evaluation metrics. Once you have a model that performs reasonably well, the next step is to deploy the model to production and evaluate its performance online, i.e., on live data. Our focus today is <em>online testing</em>.</p>
+<!--more-->
+<h2><strong>A/B testing—what is it?</strong></h2>
+<p>A/B testing has emerged as the predominant method of online testing in the industry today. It is often used to answer questions like “which model is better?” or “which design is better?” In the A/B testing setup, there is a new model (or design) and an incumbent model (or design). There is some notion of live traffic, which is split into two groups: A and B, or control and experiment. Group A is routed to the old model, and group B is routed to the new model. Their performance is compared and a decision is made about whether the new model performs substantially better than the old model. That is the rough idea, and there is a whole statistical machinery that makes this statement much more precise.</p>
+<p>This machinery is known as statistical hypothesis testing. It decides between a <em>null hypothesis</em> and an <em>alternate hypothesis</em>. Most of the time, A/B tests are formulated to answer the question “does this new model lead to a statistically significant change in the key metric?” The null hypothesis is often “the new model doesn’t change the average value of the key metric” and the alternative hypothesis “the new model changes the average value of the key metric.” The test for the average value (the population mean, in statistical speak) is the most common, but there are tests for other population parameter as well.</p>
+<p>There are many books and online resources that describe statistical hypothesis testing in rigorous detail. I won’t attempt to replicate them here. For the uninitiated, <a href="http://www.evanmiller.org/">http://www.evanmiller.org/</a> provides an excellent starting point that explains the details of hypothesis testing and provides handy software utilities.</p>
+<p>Briefly, A/B testing involves the following steps:</p>
+<ol>
+<li>Split into randomized control/experimentation groups.</li>
+<li>Observe behavior of both groups on the proposed methods.</li>
+<li>Compute test statistics.</li>
+<li>Compute p-value.</li>
+<li>Output decision.</li>
+</ol>
+<p>Simple enough. What could go wrong?</p>
+<p>A lot, as it turns out! A/B tests are easy to understand but tricky to do right. Here are a list of things to watch out for, ranging from pedantic to pragmatic. Some of them are straightforward and well-known, while others are more tricky than it sounds.</p>
+<p><img src="//cdn2.hubspot.net/hubfs/426799/images/pitfalls.jpeg?t=1458695042709" alt="pitfalls"></p>
+<h2><strong>Pitfalls/important questions when running A/B tests</strong></h2>
+<h3><strong>1. Complete separation of experiences</strong></h3>
+<p>First, take a look at your user randomization and group splitting module. Does it cleanly split off a portion of your users for the experimentation group? Are they experiencing only the new design (or model, or whatever)?&nbsp;</p>
+<p>It’s important to cleanly and completely separate the experiences between the two groups. Suppose you are testing a new button for your website. If the button appears on every page, then make sure the same user sees the same button everywhere. It’ll be better to split by user id (if available) or user sessions instead of individual page visits.</p>
+<p>Also watch out for the possibility that some of your users have been permanently “trained” by the old model or design and prefer the way things were before. In their <a href="http://www.exp-platform.com/Documents/puzzlingOutcomesInControlledExperiments.pdf">KDD 2012 paper</a>, Kohavi et al. calls this the carryover effect. Such users carry the “baggage of the old” and may return biased answers for any new model. If you think this might be the case, think about acquiring a brand new set of users or randomizing the test buckets.</p>
+<p>It’s always good to do some A/A testing to make sure that your testing framework is sound. In other words, perform the randomization and the split, but test both groups on the same model or design. See if there are any observable differences. Only move to A/B testing if the system passes the A/A test.</p>
+<h3><strong>2. Which metric?</strong></h3>
+<p>The next important question is: on which metric should you evaluate the model? Ultimately, the right metric is probably a business metric. But this may not be easily measurable in the system. For instance, search engines care about the number of users, how long they spend on the site, and their overall market share. Comparison statistics are not readily available to the live system. So they will need to approximate the ultimate business metric of market share with measurable ones like number of unique visitors per day and average session length. In practice, short-term, measurable live metrics may not always align with long-term business metrics, and it can be tricky to design the right metric.</p>
+<p>Backing up for a second, there are four classes of metrics to think about: business metrics, measurable live metrics, offline evaluation metrics, and training metrics. We just discussed the difference between business metrics and live metrics that can be measured. Offline evaluation metrics are things like the <a href="http://blog.dato.com/how-to-evaluate-machine-learning-models-part-2a-classification-metrics">classification</a>, <a href="http://blog.dato.com/how-to-evaluate-machine-learning-models-part-2b-ranking-and-regression-metrics">regression and ranking metrics</a> we discussed previously. Training metric is the loss function that is optimized during the training process. (For example, support vector machine optimizes a combination of the norm of the weight vector and misclassification penalties.)&nbsp;</p>
+<p>The optimal scenario is where all four of those metrics are either exactly the same or are linearly aligned with each other. The former is impossible. The latter is unlikely. So the next thing to shoot for is that these metrics always increase or decrease with each other. However, you may still encounter situations where a linear decrease in RMSE (a <a href="http://blog.dato.com/how-to-evaluate-machine-learning-models-part-2b-ranking-and-regression-metrics">regression metric</a>) does not translate to a linear increase in click-through rates. (Kohavi et al. described some interesting examples in their <a href="http://www.exp-platform.com/Documents/puzzlingOutcomesInControlledExperiments.pdf">KDD 2012 paper</a>.) Keep this in mind and save your efforts to optimize where it counts the most. You should always be tracking all of these metrics, so that you know when things go out of whack–usually a sign of distribution drift or software and instrumentation bug.</p>
+<h3><strong>3. How much change counts as real change?</strong>&nbsp;</h3>
+<p>Once you’ve settled on the metric, the next question is “how much of a change in this metric matters?” This is required for picking the number of observations you need for the experiment. Like question #2, this is probably not solely a data science question but a business question. Pick a reasonable value upfront and stick to it. Avoid the temptation to shift it later, as you start to see the results.</p>
+<h3><strong>4. One-sided or two-sided test?</strong></h3>
+<p>Making the wrong choice here could get you <a href="http://blog.sumall.com/journal/optimizely-got-me-fired.html">(almost) fired</a>. One-sided (or one-tailed) tests only test whether the new model is better than the baseline. It does not tell you if it is in fact worse. You should always test both, unless you are confident it can never be worse, or there are zero consequences for it being worse. A two-sided (or two-tailed) test allows the new model to be either better or worse than the original. It still requires a separate check for which is the case.</p>
+<h3><strong>5. How many false positives are you willing to tolerate?</strong></h3>
+<p>A false positive in A/B testing means that you’ve rejected the null hypothesis when the null hypothesis is true. In other words, you’ve decided that your model is better than the baseline when it isn’t better than the baseline. What’s the cost of a false positive? The answer depends on the application.</p>
+<p>In a drug effectiveness study, a false positive could cause the patient to use an ineffective drug. Conversely, a false negative could mean not using a drug that is effective at curing the disease. Both cases could have a very high cost to the patient’s health.</p>
+<p>In a machine learning A/B test, a false positive might mean switching to a model that should increase revenue when it doesn’t. A false negative means missing out on a more beneficial model and losing out on potential revenue increase.</p>
+<p>A statistical hypothesis test allows you to control the probability of false positives by setting the significance level, and false negatives via the power of the test. If you pick a false positive rate of 0.05, then out of every 20 new models that don’t improve the baseline, on average 1 of them will be falsely identified by the test as an improvement. Is this an acceptable outcome to the business?</p>
+<h3><strong>6. How many observations do you need?</strong></h3>
+<p>The number of observations is partially determine by the desired <a href="http://en.wikipedia.org/wiki/Statistical_power">statistical power</a>. This must be determined <em>prior</em> to running the test. A common temptation is to run the test until you observe a significant result. This is wrong.</p>
+<p>The power of a test is its ability to correctly identify the positives, e.g., correctly determine that a new model is doing well when it is in fact superior. It can be written as a formula that involves the significance level (question #5), the difference between the control and experimentation metrics (question #3), and the size of the samples (the number of observations included in the control and the experimentation group). You pick the right value for power, significance level, and the desired amount of change. Then you can compute how many observations you need in each group. A recent blog post from <a href="http://technology.stitchfix.com/blog/2015/05/26/significant-sample/">StitchFix</a> goes through the power analysis in minute detail.</p>
+<p>As explained in detail on <a href="http://www.evanmiller.org/how-not-to-run-an-ab-test.html">Evan Miller’s website</a>, do NOT stop the test until you’ve accumulated this many observations! Specifically, do not stop the test as soon as you detect a “significant” difference. The answer is not to be trusted since it doesn’t yet have the statistical power for good decision making.</p>
+<h3><strong>7. Is the distribution of the metric Gaussian?</strong>&nbsp;</h3>
+<p>The vast majority of A/B tests use the t-test. But the t-test makes assumptions that are not always satisfied by all metrics. It’s a good idea to look at the distribution of your metric and check whether the assumptions of the t-test are valid.</p>
+<p>The t-test assumes that the two populations are <em>Gaussian distributed</em>. Does your metric fit a Gaussian distribution? The common hand-wavy justification is to say, “Almost everything converges to a Gaussian distribution due to the Central Limit Theorem.” This is usually true when</p>
+<ol>
+<li>The metric is an average.</li>
+<li>The distribution of metric values has one mode.</li>
+<li>The metric is distributed symmetrically around this mode.</li>
+</ol>
+<p>These are actually easily violated in real-world situations. For example, the accuracy or the click-through rate is an average, but the<a href="http://blog.dato.com/how-to-evaluate-machine-learning-models-part-2a-classification-metrics"> Area Under the ROC</a> (AUC) is not. (It is an integral.) The distribution of the metric may not have one mode if there are multiple user populations within the control or experimental group. The metric is not symmetric if it can never be negative. Kohavi et al. gives examples of metrics that are definitely not Gaussian and whose standard error does not decrease with longer tests. For example, metrics involving counts are better modeled as <a href="http://en.wikipedia.org/wiki/Negative_binomial_distribution">negative binomials</a>.</p>
+<p>When these assumptions are violated, the distribution may take longer than usual to converge to a Gaussian, or not at all. Usually, the average of more than thirty observations starts to look like a Gaussian. When there is a mixture of populations, however, it will take much longer. Here are a few rules of thumb that can mitigate the violation of t-test assumptions.</p>
+<ol>
+<li>If the metric is non-negative and has a long tail, i.e., it’s a count of some sort, take the log transform.</li>
+<li>Alternatively, the family of <a href="http://en.wikipedia.org/wiki/Power_transform">Power Transforms</a> tend to stabilize the variance (decrease the variance or at least make it not dependent on the mean) and make the distribution more Gaussian-like.</li>
+<li>The negative binomial is <a href="http://www.tau.ac.il/~saharon/papers/AB%20testing%20with%20NB%20distribution%20-%20revision.pdf">a better distribution for counts</a>.</li>
+<li>If the distribution looks nowhere near a Gaussian, don’t use the t-test. Pick a non-parametric test that doesn’t make the Gaussian assumption, such as the <a href="http://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test">Mann-Whitney U test</a>.</li>
+</ol>
+<h3><strong>8. Are the variances equal?</strong>&nbsp;</h3>
+<p>Okay, you checked and double checked and you’re really sure that the distribution is a Gaussian, or will soon become a Gaussian. Fine. Next question: are the variances equal for the control and the experimental group?</p>
+<p>If the groups are split fairly (uniformly at random), the variances are probably equal. However, there could be subtle biases in your stream splitter (see question #1). Or perhaps one population is much smaller compared to the other. <a href="http://en.wikipedia.org/wiki/Welch%27s_t_test">Welch’s t test</a> is a little-known alternative to the much more common <a href="http://en.wikipedia.org/wiki/Student%27s_t-test">Student’s t test</a>. Unlike Student’s t test, Welch’s t test does not assume equal variance. For this reason, it is a more robust alternative. Here’s what wikipedia says about the advantages and limitations of Welch’s t test.</p>
+<blockquote>
+<p>Welch's t-test is more robust than Student's t-test and maintains <a href="http://en.wikipedia.org/wiki/Type_I_and_type_II_errors">type I error rates</a> close to nominal for unequal variances and for unequal sample sizes. Furthermore, the <a href="http://en.wikipedia.org/wiki/Power_(statistics)">power</a> of Welch's t-test comes close to that of Student’s t-test, even when the population variances are equal and sample sizes are balanced.</p>
+<p>It is not recommended to pre-test for equal variances and then choose between Student's t-test or Welch's t-test. Rather, Welch's t-test can be applied directly and without any substantial disadvantages to Student's t-test as noted above. Welch's t-test remains robust for skewed distributions and large sample sizes. Reliability decreases for skewed distributions and smaller samples, where one could possibly perform Welch’s t-test on ranked data.</p>
+</blockquote>
+<p>In practice, this may not make too big of a difference, because the t distribution is well approximated by the Gaussian when the sample sizes are larger than 20. However, Welch’s t test is a safe choice that works regardless of sample size or whether the variance is equal. So why not?</p>
+<h3><strong>9. What does the p-value mean?</strong></h3>
+<p>As Cosma Shalizi explained in his very detailed and <a href="http://bactra.org/weblog/1111.html">technical blog post</a>, most people interpret the p-value incorrectly. <strong>A small p-value does not imply a significant result.</strong> A smaller p-value does not imply a more significant result. The p-value is a function of the size of the samples, the difference between the two populations, and how well we can estimate the true means. I’ll leave the curious statistically-minded reader to digest the blog post (highly recommended!). The upshot is that, in addition to running the hypothesis test and computing the p-value, one should always check the confidence interval of the two population mean estimates. If the distribute is close to being Gaussian, then the usual standard error estimation applies. Otherwise, compute a bootstrap estimate, which we <a href="http://blog.dato.com/how-to-evaluate-ml-models-part-3-validation-and-offline-testing">discussed previously</a>. This can differentiate between the two cases of “there is indeed a significant difference between the two populations” vs. “I can’t tell whether there is a difference because the variances of the estimates are too high so I can’t trust the numbers.”</p>
+<h3><strong>10. Multiple models, multiple hypotheses</strong></h3>
+<p>So you are a hard-working data scientist and you have not one but five new models you want to test. Or maybe 328 of them. Your website has so much traffic that you have no problem splitting off a portion of the incoming traffic to test each of the models at the same time. Parallel $A_1 / ... / A_m / B$ testing, here we come!</p>
+<p>But wait, now you are in the situation of <a href="http://en.wikipedia.org/wiki/Multiple_comparisons_problem">multiple hypothesis testing</a>. Remember the false positive rate we talked about in question #5? Testing multiple hypotheses increases the overall false positive probability. If one test has a false positive rate of 0.05, then the probability that none of the 20 tests makes a false positive drops precipitously to $(1 - 0.05)^{20} = 0.36$. What’s more, this calculation assumes that the tests are <em>independent</em>. If the tests are not independent (i.e., maybe your 32 models all came from the same training dataset?), then the probability of a false positive may be even higher.</p>
+<p><a href="http://en.wikipedia.org/wiki/False_discovery_rate">Benjamini and Hochberg</a> proposed a useful method for dealing with false positives in multiple tests. In their 1995 paper on “Controlling the false discovery rate: A practical and powerful approach to multiple testing,” they proposed a modified procedure that orders the p-values from each test and rejects the null hypothesis for the smallest p-values where $p_{(i)} \leq \frac{i}{m} q$, where $q$ is the desired significance level, $m$ is the total number of tests, and $i$ is the ranking of the p-value. This test does not assume that the tests are independent or are normally distributed, and has more statistical power than the classic <a href="http://en.wikipedia.org/wiki/Bonferroni_correction">Bonferroni correction</a>.&nbsp;</p>
+<p>Even without running multiple tests simultaneously, you may still run into the multiple hypothesis testing scenario. For instance, if you are changing your model based on live test data, submitting new models until something achieves the acceptance threshold, then you are essentially running <em>multiple tests sequentially</em>. It’s a good idea to apply the Benjamini-Hochberg procedure (or one of its derivatives) to control the false discovery rate in this situation as well.</p>
+<h3><strong>11. How long to run the test?</strong></h3>
+<p>The answer to how long to run your A/B test depends not just on the number of observations you need in order to achieve the desired statistical power (question #6). It also has to do with the user experience.</p>
+<p>In some fields, such as pharmaceutical drug testing, running the test too long has ethical consequences for the user; if the drug is already proven to be effective, then stopping the trial early may save lives in the control group. Balancing the need for early stopping and sufficient statistical power led to the study of <a href="http://en.wikipedia.org/wiki/Sequential_analysis">sequential analysis</a>, where early stopping points are determined <em>a priori</em> to the start of the trials.</p>
+<p>In most newly emergent machine learning applications, running the test longer is not as big of a problem. More likely, the constraint is distribution drift, where the behavior of the user changes faster than one can collect enough observations. (See question #12.)</p>
+<p>When determining the length of a trial, it’s important to go beyond what’s known as the <a href="http://www.exp-platform.com/Documents/puzzlingOutcomesInControlledExperiments.pdf">Novelty effect</a>. When users are switched to a new experience, their initial reactions may not be their long-term reactions. In other words, if you are <a href="http://www.theguardian.com/technology/2014/feb/05/why-google-engineers-designers">testing a new color for a button</a>, the user may initially love the button and click it more often, just because it’s novel, or she may hate the new color and never touch it, but eventually she would get used to the new color and behave as she did before. It’s important to run the trial long enough to get past the period of the “shock of the new.”</p>
+<p>The metric may also display seasonality. For instance, the website traffic may behave one way during the day and another way at night, or perhaps people buy different types of clothes in the summer vs. fall. It’s important to take this into account and discount foreseeable changes when collecting data for the trial.</p>
+<h3><strong>12. Catching distribution drift</strong></h3>
+<p>Many machine learning models make a <em>stationarity</em> assumption, that the data looks and behaves one way for all eternity. But this is not true in practice. The world changes quickly. Nothing lasts forever. Translated into statistical terms, this means that the distribution of the data will drift from what the model was originally trained upon.</p>
+<p>Distribution drift invalidates the current model. It no longer performs as well as before. It needs to be updated.</p>
+<p>To catch distribution drift, it’s a good idea to monitor the offline metric (used for evaluations during offline testing/prototyping) on live data, in addition to online testing. If the offline metric changes significantly, then it is time to update the model by re-training on new data.&nbsp;</p>
+<h2><strong>Multi-armed bandits—an alternative to A/B testing</strong></h2>
+<p>With all of the potential pitfalls in A/B testing, one might ask whether there is a more robust alternative. The answer is yes, but not exactly for the same goals as A/B testing. If the ultimate goal is to decide which model or design is the best, then A/B testing is the right framework, along with its many gotchas to watch out for. However, if the ultimate goal is to maximize total reward, then multi-armed bandits and personalization is the way to go.</p>
+<p>The name of multi-armed bandits (MAB) comes from gambling. A slot machine is a one-armed bandit; each time you pull the lever, it outputs a certain reward (most likely negative). Multi-armed bandits are a room full of slot machines, each one with an unknown random payoff distribution. The task is to figure out which arm to pull and when, in order to maximize the reward. There are many MAB algorithms: linear UCB, Thompson sampling (or Bayesian bandits), Exp3 are some of the most well known. John Myles White wrote a <a href="http://www.amazon.com/Bandit-Algorithms-Website-Optimization-Myles/dp/1449341330">wonderful book</a> that explains these algorithms. Steven Scott wrote a great survey paper on <a href="http://www.economics.uci.edu/~ivan/asmb.874.pdf">Bayesian bandit algorithms</a>. Sergey Feldman has a few <a href="http://engineering.richrelevance.com/bandits-recommendation-systems/">blog posts</a> on this topic as well.</p>
+<p>If you have multiple competing models and you care about maximizing overall user satisfaction, then you might try running an MAB algorithm on top of the models that decides when to serve results from which model. Each incoming request is an arm pull, the MAB algorithm selects the model, forwards the query to it, gives the answer to the user, observes the user’s behavior (the reward for the model), and adjusts the estimate for the payoff distribution. As folks from <a href="http://engineering.zulily.com/2014/06/16/experience-optimization-at-zulily/">zulily</a> and <a href="http://engineering.richrelevance.com/bandits-recommendation-systems/">RichRelevance</a> can attest, MABs can be very effective at increasing overall reward.</p>
+<p>On top of plain multi-armed bandits, personalizing the reward to individual users or user groups may provide additional gains. Different users often have different rewards for each model. Shoppers in Atlanta, GA may behave very differently from shoppers in Sydney, Australia. Men may buy different things than women. With enough data, it may be possible to train a separate MAB for each user group or even each user. It is also possible to use <a href="http://engineering.richrelevance.com/personalization-contextual-bandits/">contextual bandits for personalization</a>, where one can fold in information about the user’s context into the models for the reward distribution of each model.</p>
+<h2><strong>That’s all, folks!</strong>&nbsp;</h2>
+<p>This concludes our journey through the kingdom of evaluating machine learning models. As you can see, there are some bountiful hills and valleys, but also many hidden corners and dangerous pitfalls. Knowing the ins and outs of this realm will help you avoid many unhappy incidents on the way to machine learning-izing your world. Happy exploring, adventurers!</p>
+<p>&nbsp;</p>
+<h3><strong>Other posts in this series</strong></h3>
+<p>Part 1: <a href="http://blog.dato.com/how-to-evaluate-machine-learning-models-part-1-orientation">Orientation</a></p>
+<p>Part 2a: <a href="http://blog.dato.com/how-to-evaluate-machine-learning-models-part-2a-classification-metrics">Classification metrics</a></p>
+<p>Part 2b: <a href="http://blog.dato.com/how-to-evaluate-machine-learning-models-part-2b-ranking-and-regression-metrics">Ranking and regression metrics</a></p>
+<p>Part 3: <a href="http://blog.dato.com/how-to-evaluate-ml-models-part-3-validation-and-offline-testing">Validation and offline testing</a></p>
+<p>Part 4: <a href="http://blog.dato.com/how-to-evaluate-machine-learning-models-part-4-hyperparameter-tuning">Hyperparameter tuning</a></p>
+<h2><strong>Reading list (in random order)</strong></h2>
+<p><a href="http://www.slideshare.net/dato-inc/deploying-ml">Deploying Machine Learning in Production</a>, slides from my Strata London 2015 talk.&nbsp;</p>
+<p><a href="http://technology.stitchfix.com/blog/2015/05/26/significant-sample/">So, You Need a Statistically Significant Sample?</a> Kim Larsen, StitchFix blog post, May 2015.</p>
+<p><a href="http://blog.sumall.com/journal/optimizely-got-me-fired.html">How Optimizely (Almost) Got Me Fired</a>. Peter Borden, SumAll blog post, June 2014.</p>
+<p><a href="http://eytan.github.io/www-15-tutorial/">Online Experiments for Computational Social Science</a>. Eytan Bakshy and Sean J. Taylor,&nbsp;WWW 2015 tutorial.&nbsp;</p>
+<p><a href="http://www.economics.uci.edu/~ivan/asmb.874.pdf">A modern Bayesian look at the multi-armed bandit</a>. Steven L. Scott. Applied Stochastic Models in Business and Industry, 2010.</p>
+<p><a href="http://www.evanmiller.org/">http://www.evanmiller.org/</a>, especially this one: <a href="http://www.evanmiller.org/how-not-to-run-an-ab-test.html">How Not to Run an A/B Test</a>.</p>
+<p>MAB usage at zulily: <a href="http://engineering.zulily.com/2014/06/16/experience-optimization-at-zulily/">Experience optimization at zulily</a>, Trey Causey, zulily blog post, June 2014.</p>
+<p>Cult idol Cosma Shalizi on the correct interpretation of the p-value: <a href="http://bactra.org/weblog/1111.html">http://bactra.org/weblog/1111.html</a>&nbsp;(It's not a real cult, just a group of loyal followers, myself included.)</p>
+<p><a href="http://www.exp-platform.com/Documents/puzzlingOutcomesInControlledExperiments.pdf">Trustworthy Online Controlled Experiments: Five Puzzling Outcomes Explained</a>. Ron Kohavi, Alex Deng, Brian Frasca, Roger Longbotham, Toby Walker, Ya Xu. KDD 2012.</p>
+<p><a href="http://www.tau.ac.il/~saharon/papers/AB%20testing%20with%20NB%20distribution%20-%20revision.pdf">A/B Testing Using the Negative Binomial Distribution in an Internet Search Application</a>. Saharon Rosset and Slava Borodovsky, Tel Aviv University, 2012.</p>
+<p><a href="http://www.math.tau.ac.il/~ybenja/MyPapers/benjamini_hochberg1995.pdf">Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing</a>. Yoav Benjamini and Yosef Hochberg, Journal of the Royal Statistical Society, 1995.</p>
+<p>RichRelevance blog posts on <a href="http://engineering.richrelevance.com/bandits-recommendation-systems/">bandit algorithms</a>, <a href="http://engineering.richrelevance.com/recommendations-thompson-sampling/">Thompson sampling</a>, and <a href="http://engineering.richrelevance.com/personalization-contextual-bandits/">personalization via contextual bandits</a>. Sergey Feldman, June 2014.</p>
+<p><a href="http://www.amazon.com/Bandit-Algorithms-Website-Optimization-Myles/dp/1449341330">Bandit Algorithms for Website Optimization</a>, John Myles White, O’Reilly, 2012.</p>
+<p>Survey of classic bandit algorithms:&nbsp;<a href="http://www.cs.mcgill.ca/~vkules/bandits.pdf" target="_blank">Algorithms for the multi-armed bandit problem</a>.&nbsp;Volodymyr Kuleshov volodymyr and Doina Precup. Journal of Machine Learning Research, 2000.</p>
+<p>&nbsp;</p></span>
+        </div>
+
+    </div>
+</div></div>
+
+                </div><!--end row-->
+                </div><!--end row-wrapper -->
+                <div class="row-fluid-wrapper row-depth-1 row-number-4 ">
+                <div class="row-fluid ">
+                    <div class="span12 widget-span widget-type-raw_html " style="" data-widget-type="raw_html" data-x="0" data-w="12">
+                        <div class="cell-wrapper layout-widget-wrapper">
+                            <span id="hs_cos_wrapper_module_1424985934633774" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_raw_html" style="" data-hs-cos-general-type="widget" data-hs-cos-type="raw_html"><hr></span>
+                        </div><!--end layout-widget-wrapper -->
+                    </div><!--end widget-span -->
+                </div><!--end row-->
+                </div><!--end row-wrapper -->
+                <div class="row-fluid-wrapper row-depth-1 row-number-5 ">
+                <div class="row-fluid ">
+                    <div class="span12 widget-span widget-type-raw_html " style="" data-widget-type="raw_html" data-x="0" data-w="12">
+                        <div class="cell-wrapper layout-widget-wrapper">
+                            <span id="hs_cos_wrapper_module_14249860521901422" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_raw_html" style="" data-hs-cos-general-type="widget" data-hs-cos-type="raw_html"><h2>Comments</h2>
+<br></span>
+                        </div><!--end layout-widget-wrapper -->
+                    </div><!--end widget-span -->
+                </div><!--end row-->
+                </div><!--end row-wrapper -->
+                <div class="row-fluid-wrapper row-depth-1 row-number-6 ">
+                <div class="row-fluid ">
+                    <div class="span12 widget-span widget-type-blog_comments " style="" data-widget-type="blog_comments" data-x="0" data-w="12">
+                        <div class="cell-wrapper layout-widget-wrapper">
+                            <span id="hs_cos_wrapper_blog_comments" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_blog_comments" style="" data-hs-cos-general-type="widget" data-hs-cos-type="blog_comments">
+<div class="section post-footer">
+    <div id="comments-listing" class="new-comments">
+    
+    </div>
+    <script>
+        var _hscLegacy = false;
+    </script>
+    <!--[if lte IE 8]>
+    <script>
+        _hscLegacy = true;
+    </script>
+    <![endif]-->
+    <script type="text/javascript">
+        (function($) {
+            var commentsEmbedContext = {
+                portalId: 426799,
+                collectionId: 1363301641,
+                contentId: 2929146181,
+                target: '#comments-listing.new-comments',
+                showComments: true,
+                showForm: true,
+                commentVerificationText: "your comment has been received.",
+                embedScriptEnv: "prod",
+                apiEnv: "prod",
+                isLegacyBrowser: _hscLegacy,
+                contentTitle: "How to Evaluate Machine Learning Models: The Pitfalls of A\/B Testing",
+                contentCreatedAt: "1433944800000",
+                contentPermalink: "http:\/\/blog.dato.com\/how-to-evaluate-machine-learning-models-the-pitfalls-of-ab-testing",
+                contentAuthorEmail: "alicez@graphlab.com",
+                contentAuthorName: "Alice Zheng",
+                captchaRequired: true,
+                captchaKey: "6Lc3uMsSAAAAAMjk4NIvPQK9_-ZLk2wBokFCo5Qt",
+                maxThreadDepth: 7,
+                formId: "a9f2de2c-39f7-487d-afb0-57a45b2f0fab"
+            };
+            function loadComments() {
+                if (window.hubspot && typeof window.hubspot.loadCommentsEmbed === 'function') {
+                    hubspot.loadCommentsEmbed(commentsEmbedContext.embedScriptEnv, function() {
+                        if (typeof window.hsEmbedComments === 'function') {
+                            window.hsEmbedComments(commentsEmbedContext);
+                        }
+                    }, _hscLegacy, true);
+                } else {
+                  setTimeout(loadComments, 50);
+                }
+            }
+            loadComments();
+        })(window.hsjQuery || jQuery);
+    </script>
+</div>
+
+</span>
+                        </div><!--end layout-widget-wrapper -->
+                    </div><!--end widget-span -->
+                </div><!--end row-->
+                </div><!--end row-wrapper -->
+            </div><!--end widget-span -->
+        <div class="span4 widget-span widget-type-cell " style="margin-bottom: 30px" data-widget-type="cell" data-x="8" data-w="4">
+
+            <div class="row-fluid-wrapper row-depth-1 row-number-7 ">
+            <div class="row-fluid ">
+                <div class="span12 widget-span widget-type-blog_subscribe " style="" data-widget-type="blog_subscribe" data-x="0" data-w="12">
+                    <div class="cell-wrapper layout-widget-wrapper">
+                        <span id="hs_cos_wrapper_blog_subscription" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_blog_subscribe" style="" data-hs-cos-general-type="widget" data-hs-cos-type="blog_subscribe"><h3 id="hs_cos_wrapper_blog_subscription_title" class="hs_cos_wrapper form-title" data-hs-cos-general-type="widget_field" data-hs-cos-type="text">Subscribe to Dato Blog notifications</h3>
+
+<div id="hs_form_target_blog_subscription"></div>
+
+<!--[if lte IE 8]>
+<script charset="utf-8" src="https://js.hsforms.net/forms/v2-legacy.js"></script>
+<![endif]-->
+<script charset="utf-8" src="//js.hsforms.net/forms/v2.js"></script>
+
+<script>
+    hbspt.forms.create({
+        portalId: '426799',
+        formId: 'e0074f76-7492-4e2b-a2ec-460ec318ae0b',
+        formInstanceId: '1310',
+        pageId: 2929146181,
+        pageName: 'How to Evaluate Machine Learning Models: The Pitfalls of A/B Testing',
+        redirectUrl: 'http://blog.dato.com/how-to-evaluate-machine-learning-models-the-pitfalls-of-ab-testing?hsFormKey=6e64b709b4247079ee592362d5b48205#blog_subscription',
+        css: '',
+        target: '#hs_form_target_blog_subscription',
+        
+        formData: {
+          cssClass: 'hs-form stacked'
+        }
+    });
+</script></span>
+                    </div><!--end layout-widget-wrapper -->
+                </div><!--end widget-span -->
+            </div><!--end row-->
+            </div><!--end row-wrapper -->
+            <div class="row-fluid-wrapper row-depth-1 row-number-8 ">
+            <div class="row-fluid ">
+                <div class="span12 widget-span widget-type-raw_html " style="" data-widget-type="raw_html" data-x="0" data-w="12">
+                    <div class="cell-wrapper layout-widget-wrapper">
+                        <span id="hs_cos_wrapper_module_14291433966363196" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_raw_html" style="" data-hs-cos-general-type="widget" data-hs-cos-type="raw_html"><br></span>
+                    </div><!--end layout-widget-wrapper -->
+                </div><!--end widget-span -->
+            </div><!--end row-->
+            </div><!--end row-wrapper -->
+            <div class="row-fluid-wrapper row-depth-1 row-number-9 ">
+            <div class="row-fluid ">
+                <div class="span12 widget-span widget-type-post_listing " style="" data-widget-type="post_listing" data-x="0" data-w="12">
+                    <div class="cell-wrapper layout-widget-wrapper">
+                        <span id="hs_cos_wrapper_top_posts" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_post_listing" style="" data-hs-cos-general-type="widget" data-hs-cos-type="post_listing"><div class="block">
+  <h3>Recent Posts</h3>
+  <div class="widget-module">
+    <ul>
+      
+      <li>
+        
+        <a href="http://blog.dato.com/gravitational-waves-exist-and-its-possible-to-predict-next-day-forex-exchange-rates">Gravitational Waves Exist and It’s Possible to Predict Next Day Forex Exchange Rates</a>
+      </li>
+      
+      <li>
+        
+        <a href="http://blog.dato.com/women-in-technology-who-inspire-us">Shoulders of Giants: Women in Technology Who Inspire Us</a>
+      </li>
+      
+      <li>
+        
+        <a href="http://blog.dato.com/state-of-the-sframe-2016">State of the SFrame</a>
+      </li>
+      
+      <li>
+        
+        <a href="http://blog.dato.com/is-capacity-the-main-purpose-for-deploying-lte">Is Capacity the Main Purpose for Deploying LTE?</a>
+      </li>
+      
+      <li>
+        
+        <a href="http://blog.dato.com/elementary-my-dear-watson-an-introduction-to-text-analytics-using-sherlock-holmes-stories">Elementary, My Dear Watson! An Introduction to Text Analytics Using Sherlock Holmes Stories</a>
+      </li>
+      
+    </ul>
+  </div>
+</div></span>
+                    </div><!--end layout-widget-wrapper -->
+                </div><!--end widget-span -->
+            </div><!--end row-->
+            </div><!--end row-wrapper -->
+            <div class="row-fluid-wrapper row-depth-1 row-number-10 ">
+            <div class="row-fluid ">
+                <div class="span12 widget-span widget-type-raw_html " style="" data-widget-type="raw_html" data-x="0" data-w="12">
+                    <div class="cell-wrapper layout-widget-wrapper">
+                        <span id="hs_cos_wrapper_module_14291433726662394" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_raw_html" style="" data-hs-cos-general-type="widget" data-hs-cos-type="raw_html"><br></span>
+                    </div><!--end layout-widget-wrapper -->
+                </div><!--end widget-span -->
+            </div><!--end row-->
+            </div><!--end row-wrapper -->
+            <div class="row-fluid-wrapper row-depth-1 row-number-11 ">
+            <div class="row-fluid ">
+                <div class="span12 widget-span widget-type-raw_html " style="" data-widget-type="raw_html" data-x="0" data-w="12">
+                    <div class="cell-wrapper layout-widget-wrapper">
+                        <span id="hs_cos_wrapper_module_1435884573082751" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_raw_html" style="" data-hs-cos-general-type="widget" data-hs-cos-type="raw_html"><a href="http://go.dato.com/webinars/image-similarity-deep-learning-20151006?_ga=1.114615047.168097558.1407262641"><img src="//cdn2.hubspot.net/hubfs/426799/webinar-ad-itemsimilarity.png?t=1458695042709" alt=""></a>
+<br><br></span>
+                    </div><!--end layout-widget-wrapper -->
+                </div><!--end widget-span -->
+            </div><!--end row-->
+            </div><!--end row-wrapper -->
+            <div class="row-fluid-wrapper row-depth-1 row-number-12 ">
+            <div class="row-fluid ">
+                <div class="span12 widget-span widget-type-post_filter " style="" data-widget-type="post_filter" data-x="0" data-w="12">
+                    <div class="cell-wrapper layout-widget-wrapper">
+                        <span id="hs_cos_wrapper_post_filter" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_post_filter" style="" data-hs-cos-general-type="widget" data-hs-cos-type="post_filter"><div class="block">
+  <h3>Posts by Topic</h3>
+  <div class="widget-module">
+    <ul>
+      
+        <li>
+          <a href="http://blog.dato.com/topic/graphlab-create">GraphLab Create <span class="filter-link-count" dir="ltr">(20)</span></a>
+        </li>
+      
+        <li>
+          <a href="http://blog.dato.com/topic/data-science">Data Science <span class="filter-link-count" dir="ltr">(19)</span></a>
+        </li>
+      
+        <li>
+          <a href="http://blog.dato.com/topic/sframe">SFrame <span class="filter-link-count" dir="ltr">(11)</span></a>
+        </li>
+      
+        <li>
+          <a href="http://blog.dato.com/topic/data-science-tools">Data Science Tools <span class="filter-link-count" dir="ltr">(9)</span></a>
+        </li>
+      
+        <li>
+          <a href="http://blog.dato.com/topic/company-news">company news <span class="filter-link-count" dir="ltr">(8)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/machine-learning-primer">Machine Learning Primer <span class="filter-link-count" dir="ltr">(6)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/big-data-analytics">Big Data Analytics <span class="filter-link-count" dir="ltr">(4)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/machine-learning-concepts">Machine Learning Concepts <span class="filter-link-count" dir="ltr">(4)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/machine-learning-use-cases">Machine Learning Use Cases <span class="filter-link-count" dir="ltr">(4)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/predictive-services">Predictive Services <span class="filter-link-count" dir="ltr">(4)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/deep-learning">Deep Learning <span class="filter-link-count" dir="ltr">(3)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/graphlab-canvas">GraphLab Canvas <span class="filter-link-count" dir="ltr">(3)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/guest-post">Guest Post <span class="filter-link-count" dir="ltr">(3)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/machine-learning-models">Machine Learning Models <span class="filter-link-count" dir="ltr">(3)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/spark">Spark <span class="filter-link-count" dir="ltr">(3)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/text-classification">Text Classification <span class="filter-link-count" dir="ltr">(3)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/big-data">Big Data <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/data-visualization">Data Visualization <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/dato-technology-deep-dive">Dato Technology Deep Dive <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/distributed-systems">Distributed Systems <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/graphlab-conference">GraphLab Conference <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/image-analysis">Image Analysis <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/log-data">Log Data <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/machine-learning">Machine Learning <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/machine-learning-coursera">Machine Learning Coursera <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/open-source">Open Source <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/personalization">Personalization <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/use-cases">Use Cases <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/apache-spark">Apache Spark <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/churn-prediction">Churn Prediction <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/data-science-trends">Data Science Trends <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/data-structures">Data Structures <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/dato-conference">Dato Conference <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/dato-culture">Dato culture <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/fraud-detection">Fraud Detection <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/front-end-development">Front End Development <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/graph-analysis">Graph Analysis <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/hadoop">Hadoop <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/image-similiarity">Image Similiarity <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/intelligent-apps">Intelligent Apps <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/kaggle-competition">Kaggle competition <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/logistic-regression">Logistic Regression <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/machine-learning-for-ecommerce">Machine Learning for eCommerce <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/machine-learning-workshop">Machine Learning Workshop <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/natural-language-processing">Natural Language Processing <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/nfl-data">NFL Data <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/nlp">NLP <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/numpy">Numpy <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/pandas">Pandas <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/predictive-applications">Predictive Applications <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/python">Python <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/r">R <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/regression-analysis">Regression Analysis <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/scikit-learn">scikit-learn <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/sentiment-analysis">Sentiment Analysis <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/sframes">SFrames <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/text-analysis">Text Analysis <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/webinar">Webinar <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/topic/women-in-technology">Women in Technology <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+    </ul>
+    
+      <a class="filter-expand-link" href="#">see all</a>
+    
+  </div>
+</div>
+</span>
+                    </div><!--end layout-widget-wrapper -->
+                </div><!--end widget-span -->
+            </div><!--end row-->
+            </div><!--end row-wrapper -->
+            <div class="row-fluid-wrapper row-depth-1 row-number-13 ">
+            <div class="row-fluid ">
+                <div class="span12 widget-span widget-type-raw_html " style="" data-widget-type="raw_html" data-x="0" data-w="12">
+                    <div class="cell-wrapper layout-widget-wrapper">
+                        <span id="hs_cos_wrapper_module_14291433183021577" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_raw_html" style="" data-hs-cos-general-type="widget" data-hs-cos-type="raw_html"><br></span>
+                    </div><!--end layout-widget-wrapper -->
+                </div><!--end widget-span -->
+            </div><!--end row-->
+            </div><!--end row-wrapper -->
+            <div class="row-fluid-wrapper row-depth-1 row-number-14 ">
+            <div class="row-fluid ">
+                <div class="span12 widget-span widget-type-post_filter " style="" data-widget-type="post_filter" data-x="0" data-w="12">
+                    <div class="cell-wrapper layout-widget-wrapper">
+                        <span id="hs_cos_wrapper_module_140788704538915520" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_post_filter" style="" data-hs-cos-general-type="widget" data-hs-cos-type="post_filter"><div class="block">
+  <h3>Posts by Author</h3>
+  <div class="widget-module">
+    <ul>
+      
+        <li>
+          <a href="http://blog.dato.com/author/alice-zheng">Alice Zheng <span class="filter-link-count" dir="ltr">(12)</span></a>
+        </li>
+      
+        <li>
+          <a href="http://blog.dato.com/author/carlos-guestrin">Carlos Guestrin <span class="filter-link-count" dir="ltr">(8)</span></a>
+        </li>
+      
+        <li>
+          <a href="http://blog.dato.com/author/jennifer-bolton">Jennifer Bolton <span class="filter-link-count" dir="ltr">(8)</span></a>
+        </li>
+      
+        <li>
+          <a href="http://blog.dato.com/author/chris-dubois">Chris DuBois <span class="filter-link-count" dir="ltr">(6)</span></a>
+        </li>
+      
+        <li>
+          <a href="http://blog.dato.com/author/rajat-arya">Rajat Arya <span class="filter-link-count" dir="ltr">(5)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/krishna-sridhar">Krishna Sridhar <span class="filter-link-count" dir="ltr">(4)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/yucheng-low">Yucheng Low <span class="filter-link-count" dir="ltr">(4)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/danny-bickson">Danny Bickson <span class="filter-link-count" dir="ltr">(3)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/michael-fire">Michael Fire <span class="filter-link-count" dir="ltr">(3)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/shawn-scully">Shawn Scully <span class="filter-link-count" dir="ltr">(3)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/brian-kent">Brian Kent <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/johnnie-konstantas">Johnnie Konstantas <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/piotr-teterwak">Piotr Teterwak <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/robert-voyer">Robert Voyer <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/susan-romero">Susan Romero <span class="filter-link-count" dir="ltr">(2)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/alon-palombo">Alon Palombo <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/antoine-atallah">Antoine Atallah <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/dick-kreisberg">Dick Kreisberg <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/eduardo-rosini">Eduardo Rosini <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/emad-soroush">Emad Soroush <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/emily-fox">Emily Fox <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/francesco-malandrino">Francesco Malandrino <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/gerard-cunningham">Gerard Cunningham <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/jay-haijie-gu">Jay (Haijie) Gu <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/kevin-markham">Kevin Markham <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/martin-kircher">Martin Kircher <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/neil-hughes-guest-tech-blogger">Neil Hughes (Guest Tech Blogger) <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/nick-mcclure">Nick McClure <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/pablo-serrano">Pablo Serrano <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/sylvie-liberman">Sylvie Liberman <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/tigran-sargsyan">Tigran Sargsyan <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/tim-muss">Tim Muss <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/timmy-wilson">Timmy Wilson <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/trey-causey">Trey Causey <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+        <li style="display:none;">
+          <a href="http://blog.dato.com/author/zach-nation">Zach Nation <span class="filter-link-count" dir="ltr">(1)</span></a>
+        </li>
+      
+    </ul>
+    
+      <a class="filter-expand-link" href="#">see all</a>
+    
+  </div>
+</div>
+</span>
+                    </div><!--end layout-widget-wrapper -->
+                </div><!--end widget-span -->
+            </div><!--end row-->
+            </div><!--end row-wrapper -->
+        </div><!--end widget-span -->
+</div><!--end row-->
+</div><!--end row-wrapper -->
+
+    </div><!--end body -->
+</div><!--end body wrapper -->
+
+<div class="footer-container-wrapper">
+    <div class="footer-container container-fluid">
+
+        <div class="row-fluid-wrapper row-depth-1 row-number-1 ">
+        <div class="row-fluid ">
+            <div class="span12 widget-span widget-type-raw_html " style="" data-widget-type="raw_html" data-x="0" data-w="12">
+                <div class="cell-wrapper layout-widget-wrapper">
+                    <span id="hs_cos_wrapper_module_14078868566506559" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_raw_html" style="" data-hs-cos-general-type="widget" data-hs-cos-type="raw_html"><footer>
+<div id="gl-prefooter"> 
+<div class="container">
+<div class="col-sm-3 col-xs-12">
+<div class="gl-footer-about">
+About
+</div>
+<div class="gl-footer-links">
+<div>
+<div class="gl-footer-link">
+<a href="http://dato.com/company/contact.html">
+Contact
+</a>
+</div>
+<div class="gl-footer-link">
+<a href="http://dato.com/company/team/index.html">
+Team
+</a>
+</div>
+<div class="gl-footer-link">
+<a href="http://blog.dato.com/">
+Blog
+</a>
+</div>
+</div>
+<div>
+<div class="gl-footer-link">
+<a href="http://dato.com/company/careers.html">
+Careers
+</a>
+</div>
+<div class="gl-footer-link">
+<a href="http://dato.com/company/press.html">
+Press
+</a>
+</div>
+<div class="gl-footer-link">
+<a href="http://dato.com/company/team/investors.html">
+Investors
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class="col-sm-3 col-xs-12">
+<div class="gl-footer-social">
+<div class="gl-footer-about">
+Connect With Us
+</div>
+<ul class="nav nav-pills gl-footer-socialbuttons">
+<li><a href="https://twitter.com/datoinc"><i class="fa fa-twitter"></i></a></li>
+<li><a href="http://www.linkedin.com/company/dato"><i class="fa fa-linkedin"></i></a></li>
+<li><a href="https://www.facebook.com/datoinc"><i class="fa fa-facebook"></i></a></li>
+</ul>
+<ul class="nav nav-pills gl-footer-socialbuttons">
+<li><a href="https://plus.google.com/+DatoInc/videos"><i class="fa fa-youtube"></i></a></li>
+<li><a href="https://plus.google.com/+DatoInc"><i class="fa fa-google-plus"></i></a></li>
+<li><a href="http://blog.dato.com/rss.xml"><i class="fa fa-rss"></i></a></li>
+</ul>
+</div>
+</div>
+<div class="col-sm-6 col-xs-12">
+<p class="gl-footer-about">Subscribe to our Machine Learning Blog</p>
+<p style="font-size: 14px; color: #FFF;">Get data science insights and best practices from the <br>Dato team sent right to your inbox.</p>
+<script charset="utf-8" src="//js.hsforms.net/forms/current.js"></script>
+<script>
+hbspt.forms.create({ 
+portalId: '426799',
+formId: 'e0074f76-7492-4e2b-a2ec-460ec318ae0b',
+css: 'body.hs-blog-post .hbspt-form .hs-input, body.hs-blog-listing .hbspt-form .hs-input {width:186px;} body.hs-blog-post .hbspt-form .hs_submit .hs-button, body.hs-blog-listing .hbspt-form .hs_submit .hs-button {background:#0a8cc4; margin-bottom:30px;} body.hs-blog-post .hbspt-form .hs_submit .hs-button:hover, body.hs-blog-listing .hbspt-form .hs_submit .hs-button:hover {background:#0474A5;} body.hs-blog-post .hbspt-form .hs_submit .hs-button:active, body.hs-blog-listing .hbspt-form .hs_submit .hs-button:active {background:#0474A5;} body.hs-blog-post .hbspt-form .hs_submit .hs-button:focus, body.hs-blog-listing .hbspt-form .hs_submit .hs-button:focus {background:#0474A5;}'
+});
+</script>
+</div>
+</div>
+</div>
+<div id="cml-footer">
+<div class="container">
+<span class="cml-footer-text pull-left">
+© 2015 Dato · All Rights Reserved. No part of this website may be reproduced without Dato's expressed consent. Dato, GraphLab, GraphLab Create and logos are property of Dato.
+&nbsp;&nbsp;
+<a href="http://dato.com/legal/privacy_policy.html">
+Privacy Policy
+</a>
+&nbsp;|&nbsp;
+<a href="http://dato.com/legal/terms_of_use.html">
+Terms of Use
+</a>
+</span>
+</div>
+</div>
+<div class="cml-colorbar-bottom-container">
+<table class="cml-colorbar-bottom" width="100%" border="0" cellspacing="0" cellpadding="0">
+<tbody><tr>
+<td width="20%" bgcolor="#B0007F"></td>
+<td width="20%" bgcolor="#0A8CC4"></td>
+<td width="20%" bgcolor="#85BD00"></td>
+<td width="20%" bgcolor="#FF5500"></td>
+<td width="20%" bgcolor="#5E5555"></td>
+</tr>
+</tbody></table>
+</div>
+</footer></span>
+                </div><!--end layout-widget-wrapper -->
+            </div><!--end widget-span -->
+        </div><!--end row-->
+        </div><!--end row-wrapper -->
+
+    </div><!--end footer -->
+</div><!--end footer wrapper -->
+
+
+    
+<script type="text/javascript" src="//static.hsstatic.net/content_shared_assets/static-1.4002/js/public_common.js"></script>
+
+<!-- Start of Async HubSpot Analytics Code -->
+<script type="text/javascript">
+var _hsq = _hsq || [];
+_hsq.push(["setContentType", "blog-post"]);
+_hsq.push(["setCanonicalUrl", "http:\/\/blog.dato.com\/how-to-evaluate-machine-learning-models-the-pitfalls-of-ab-testing"]);
+_hsq.push(["setPageId", "2929146181"]);
+_hsq.push(["setContentMetadata", {
+    "contentPageId": 2929146181,
+    "legacyPageId": "2929146181",
+    "contentGroupId": 1363301641,
+    "abTestId": null
+}]);
+_hsq.push(["setTargetedContentMetadata", []]);
+(function(d,s,i,r) {
+    if (d.getElementById(i)){return;}
+    var n=d.createElement(s),e=d.getElementsByTagName(s)[0];
+    n.id=i;n.src='//js.hs-analytics.net/analytics/'+(Math.ceil(new Date()/r)*r)+'/426799.js';
+    e.parentNode.insertBefore(n, e);
+})(document,"script","hs-analytics",300000);
+</script>
+<!-- End of Async HubSpot Analytics Code -->
+
+
+<script type="text/javascript">
+var hsVars = {
+    ticks: 1459326000178,
+    page_id: 2929146181,
+    content_group_id: 1363301641,
+    portal_id: 426799,
+    app_hs_base_url: "https://app.hubspot.com"
+}
+</script>
+
+
+
+<script src="//cdn2.hubspot.net/hub/426799/hub_generated/style_manager/1411116210003/custom/page/GraphLab_Sept2014-theme/GraphLab_Sept2014-main.min.js"></script>
+
+<div id="fb-root"></div>
+ <script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&status=0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script type="text/javascript">
+  window.___gcfg = {
+    lang: 'en-US',
+    parsetags: 'onload'
+  };
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+ <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+ 
+
+
+    <!-- Generated by the HubSpot Template Builder - template version 1.03 -->
+
+<!-- end coded_template: id:3559327832 path:generated_layouts/3559327822.html -->
+</body></html>

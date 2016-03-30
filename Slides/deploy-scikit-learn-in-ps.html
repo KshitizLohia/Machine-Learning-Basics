@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="//cdn.optimizely.com/js/2848610060.js"></script>
+    <script src="https://dato.com/js/metrics.js"></script>
+    
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/ico" href="https://dato.com/favicon.ico" />
+  <title>
+  Deploy scikit-learn models in Dato Predictive Services | Dato Notebook
+ | Dato</title>
+
+  <!--  -->
+  
+
+  <!--  -->
+  
+
+  
+    <meta property="og:title" content="Deploy scikit-learn models in Dato Predictive Services | Dato Notebook" />
+    <meta property="og:site_name" content="Dato">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://dato.com/learn/gallery/notebooks/deploy-scikit-learn-in-ps.html" />
+    
+    <meta property="og:image" content="https://dato.com/images/dato-logo-stacked-1200x630.png" />
+    
+  
+
+  
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@datoinc" />
+    <meta name="twitter:title" content="Deploy scikit-learn models in Dato Predictive Services | Dato Notebook" />
+    <meta name="twitter:url" content="https://dato.com/learn/gallery/notebooks/deploy-scikit-learn-in-ps.html" />
+    
+  <!--  -->
+  
+    
+  
+
+  
+  <link rel="canonical" href="https://dato.com/learn/gallery/notebooks/deploy-scikit-learn-in-ps.html" />
+
+  
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet" />
+    <style>
+      span.trademark {
+        font-size: 0.5em;
+        vertical-align: super;
+      }
+    </style>
+    
+    
+        <link href="https://dato.com/styles/GraphLab.css" rel="stylesheet" />
+      
+  
+
+  
+    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"></script>
+    <script src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+  <script src="https://dato.com/files/vendor/fastclick.js"></script>
+
+  
+  <script type="text/javascript" src="//use.typekit.net/hzm6svm.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-migrate/1.2.1/jquery-migrate.min.js"></script>
+
+  
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+  
+  <script src="https://dato.com/js/GraphLab.js"></script>
+
+  
+  <script charset="utf-8" src="//js.hsforms.net/forms/current.js"></script>
+  <script src="https://dato.com/js/vendor.js"></script>
+  <script src="https://dato.com/js/footer.js"></script>
+
+  <script type="text/javascript">
+  // attach handlers when document is ready
+  $( function() {
+    var $menuRight = $('#menuRight'),
+        $pushRightButton = $('#showRightPush'),
+        $body = $('body');
+
+    FastClick.attach(document.getElementById('menuRight'));
+
+    function togglePushMenu(evt) {
+      $pushRightButton.toggleClass('active' );
+      $body.toggleClass('cbp-spmenu-push-toleft' );
+      $menuRight.toggleClass('cbp-spmenu-open' );
+      evt.stopPropagation();
+    }
+
+    function closePushMenu(evt) {
+      if ($pushRightButton.hasClass('active')) {
+        togglePushMenu(evt);
+      }
+    }
+
+    //toggle the push menu with the button
+    $pushRightButton.on('click', togglePushMenu);
+
+    $('.nav-pushmenu-menuitem').on('click', function(evt) {
+
+      evt.stopPropagation();
+
+      var $open = $(this).siblings('.open');
+      $open.removeClass('open');
+      $open.find('.nav-arrow').removeClass('nav-rotate');
+
+      //toggle current selection
+      $(this).toggleClass('open');
+      $(this).find('.nav-arrow').toggleClass('nav-rotate');
+    });
+
+    $('body').on('click', closePushMenu);
+
+    //only use window resize to remove push menu, not add it.
+    $(window).on('resize', closePushMenu );
+  });
+  </script>
+    <script type="text/javascript">
+      $(function() {
+        GraphLab.Nav.attachHandlers();
+      });
+    </script>
+    
+  
+
+    
+    
+      
+  
+
+
+  </head>
+  <body class="gl">
+    
+  <div>
+    
+      
+
+
+
+<header>
+  <table style="width: 100%; height: 5px;" border="0" cellspacing="0" cellpadding="0">
+    <tbody>
+      <tr>
+        <td width="20%" bgcolor="#B0007F"></td>
+        <td width="20%" bgcolor="#0A8CC4"></td>
+        <td width="20%" bgcolor="#85BD00"></td>
+        <td width="20%" bgcolor="#FF5500"></td>
+        <td width="20%" bgcolor="#5E5555"></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 visible-xs">
+        
+        <a rel="home" href="https://dato.com" style="display: inline-block; vertical-align: top; margin-top: 15px;">
+    <div id="dato-logo"></div>
+  </a>
+        <nav class="navbar-default pull-right">
+          <button
+            type="button"
+            id="showRightPush"
+            style="display: inline-block; vertical-align: top;"
+            class="navbar-toggle"
+          >
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </nav>
+      </div>
+      <div class="col-xs-12 hidden-xs">
+        
+        <a rel="home" href="https://dato.com" style="display: inline-block; vertical-align: top; margin-top: 15px;">
+    <div id="dato-logo"></div>
+  </a>
+        <nav style="display: inline-block; margin-top: 56px">
+          <ul class="list-inline">
+            
+              <li>
+                <a href="https://dato.com/products/">
+                  Products
+                </a>
+                
+                  <div class="dropdown">
+                    <div class="space"></div>
+                    <div class="arrow"></div>
+                    <ul class="dropdown-menu" role="menu">
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/products/create/"
+                          >GraphLab Create
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/products/distributed/"
+                          >Dato Distributed
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/products/predictive-services/"
+                          >Dato Predictive Services
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/products/faq.html"
+                          >FAQs
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/download/"
+                          >Free Trial
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/download/install.html"
+                          >Install
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/buy/"
+                          >Buy
+                        </a>
+                        </li>
+                        
+                      
+                    </ul>
+                  </div>
+                
+              </li>
+            
+              <li>
+                <a href="https://dato.com/solutions/use-cases.html">
+                  Solutions
+                </a>
+                
+                  <div class="dropdown">
+                    <div class="space"></div>
+                    <div class="arrow"></div>
+                    <ul class="dropdown-menu" role="menu">
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/solutions/industries.html"
+                          >By Industry
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/solutions/use-cases.html"
+                          >By Use Case
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/solutions/machine-learning-algorithms.html"
+                          >By Algorithm
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/solutions/machine-learning-toolkits.html"
+                          >By Toolkit
+                        </a>
+                        </li>
+                        
+                      
+                    </ul>
+                  </div>
+                
+              </li>
+            
+              <li>
+                <a href="https://dato.com/customers/">
+                  Customers
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="https://dato.com/learn/">
+                  Learn
+                </a>
+                
+                  <div class="dropdown">
+                    <div class="space"></div>
+                    <div class="arrow"></div>
+                    <ul class="dropdown-menu" role="menu">
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/learn/gallery/"
+                          >Gallery
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/learn/coursera/"
+                          >Coursera
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/learn/how-to/"
+                          >How-To
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/learn/translator/"
+                          >Translator
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/products/create/docs/"
+                          >API Documentation
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/learn/userguide/"
+                          >User Guide
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://github.com/dato-code/GraphLab-Create-SDK"
+                          >C++ SDK
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="http://forum.dato.com"
+                          >Forum
+                        </a>
+                        </li>
+                        
+                      
+                    </ul>
+                  </div>
+                
+              </li>
+            
+              <li>
+                <a href="https://dato.com/events/">
+                  Events
+                </a>
+                
+                  <div class="dropdown">
+                    <div class="space"></div>
+                    <div class="arrow"></div>
+                    <ul class="dropdown-menu" role="menu">
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="https://dato.com/events/"
+                          >Upcoming Events
+                        </a>
+                        </li>
+                        
+                          <li role="presentation" class="divider"></li>
+                        
+                      
+                        <li>
+                          <a
+                            role="menuitem"
+                            tabindex="-1"
+                            href="http://conf.dato.com"
+                          >Data Science Summit
+                        </a>
+                        </li>
+                        
+                      
+                    </ul>
+                  </div>
+                
+              </li>
+            
+              <li>
+                <a href="http://blog.dato.com">
+                  Blog
+                </a>
+                
+              </li>
+            
+          </ul>
+        </nav>
+        <div class="pull-right dato-buy-download-cluster">
+          <div class="dato-buy-contact">
+            <a href="https://dato.com/buy/">Buy</a>
+            <a class="pull-right" href="https://dato.com/company/contact.html">Contact Us</a>
+          </div>
+          <div>
+            <a class="btn btn-primary" id="header-btn" href="https://dato.com/download/">Free Trial</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right" id="menuRight" >
+  <h3>Menu</h3>
+  
+  <div class="nav-pushmenu-menuitem">
+    <a href="javascript:"
+    >
+    Products
+    
+    <span class="nav-arrow fa fa-chevron-right">
+      
+    </a>
+    
+    <ul class="nav-pushmenu-submenu">
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/products/create/"
+        >GraphLab Create
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/products/distributed/"
+        >Dato Distributed
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/products/predictive-services/"
+        >Dato Predictive Services
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/products/faq.html"
+        >FAQs
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/download/"
+        >Free Trial
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/download/install.html"
+        >Install
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/buy/"
+        >Buy
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+  
+  
+  <div class="nav-pushmenu-menuitem">
+    <a href="javascript:"
+    >
+    Solutions
+    
+    <span class="nav-arrow fa fa-chevron-right">
+      
+    </a>
+    
+    <ul class="nav-pushmenu-submenu">
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/solutions/industries.html"
+        >By Industry
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/solutions/use-cases.html"
+        >By Use Case
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/solutions/machine-learning-algorithms.html"
+        >By Algorithm
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/solutions/machine-learning-toolkits.html"
+        >By Toolkit
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+  
+  
+  <div class="nav-pushmenu-menuitem">
+    <a href="https://dato.com/customers/"
+    >
+    Customers
+    
+    <span class="nav-arrow fa fa-chevron-right">
+      
+    </a>
+    
+    <ul class="nav-pushmenu-submenu">
+      
+    </ul>
+  </div>
+  
+  
+  <div class="nav-pushmenu-menuitem">
+    <a href="javascript:"
+    >
+    Learn
+    
+    <span class="nav-arrow fa fa-chevron-right">
+      
+    </a>
+    
+    <ul class="nav-pushmenu-submenu">
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/learn/gallery/"
+        >Gallery
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/learn/coursera/"
+        >Coursera
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/learn/how-to/"
+        >How-To
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/learn/translator/"
+        >Translator
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/products/create/docs/"
+        >API Documentation
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/learn/userguide/"
+        >User Guide
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://github.com/dato-code/GraphLab-Create-SDK"
+        >C++ SDK
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="http://forum.dato.com"
+        >Forum
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+  
+  
+  <div class="nav-pushmenu-menuitem">
+    <a href="javascript:"
+    >
+    Events
+    
+    <span class="nav-arrow fa fa-chevron-right">
+      
+    </a>
+    
+    <ul class="nav-pushmenu-submenu">
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="https://dato.com/events/"
+        >Upcoming Events
+        </a>
+      </li>
+      
+      <li role="presentation">
+        <a class="nav-pushmenu-submenu-item" role="menuitem" tabindex="-1" href="http://conf.dato.com"
+        >Data Science Summit
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+  
+  
+  <div class="nav-pushmenu-menuitem">
+    <a href="http://blog.dato.com"
+    >
+    Blog
+    
+    <span class="nav-arrow fa fa-chevron-right">
+      
+    </a>
+    
+    <ul class="nav-pushmenu-submenu">
+      
+    </ul>
+  </div>
+  
+  
+</nav>
+    
+    <div id="content-body">
+    
+<div class="container gl-2col">
+  
+  
+
+  <div >
+    
+
+      <div class="cml-notebook-userbar">
+        <div class="row cml-nb-profile-area">
+          <div class="col-sm-4 col-xs-12 cml-nb-userbar-left">
+            <div class="pull-left">
+              <img class="cml-nb-profile-pic" src="https://dato.com/images/team/ping.jpg" />
+            </div>
+            <div class="pull-left nb_authordate">
+              <div>Ping Wang</div>
+              <div>Uploaded Mar 3, 2015</div>
+            </div>
+          </div>
+          <div class="col-sm-4 col-xs-12">
+            <div class="dropdown" id="cml-nb-download-dropdown">
+              <button type="button" class="btn btn-default dropdown-toggle btn-cml-nb-download" data-toggle="dropdown">
+                <span>Download</span>
+                <span class="glyphicon glyphicon-chevron-down"></span>
+              </button>
+              <ul class="dropdown-menu cml-nb-dropdown-menu" role="menu">
+                <li><a onclick="trackEvent('notebook', 'download_py', 'deploy-scikit-learn-in-ps');" href="https://dato.com/learn/gallery/notebooks/deploy-scikit-learn-in-ps.py">Python Code</a></li>
+                <li><a onclick="trackEvent('notebook', 'download_ipynb', 'deploy-scikit-learn-in-ps');" href="https://dato.com/learn/gallery/notebooks/deploy-scikit-learn-in-ps.ipynb">IPython Notebook</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-sm-4 hidden-xs cml-nb-userbar-right">
+            
+            <div class="pull-right">
+              <ul class="nav nav-pills cml-nb-userbar-sharing">
+    <li><a target="_blank" href="https://twitter.com/share?url=https%3A//dato.com%7B%7B%20glcom_url%20%7D%7D/learn/notebooks/deploy-scikit-learn-in-ps.html"><i class="fa fa-twitter fa-lg"></i></a></li>
+    <li><a target="_blank" href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A//dato.com%7B%7B%20glcom_url%20%7D%7D/learn/notebooks/deploy-scikit-learn-in-ps.html&amp;title=Deploy%20scikit-learn%20models%20in%20Dato%20Predictive%20Services&amp;summary=Deploy%20scikit-learn%20model%20with%20Dato%20Predictive%20Services%C2%B6%20Deploying%20models%20created%20using%20scikit-learn%20in%20a%20Dato%20Predictive%20Service%20is%20very%20easy.%20This%20notebook%20walks%20you%20through%20the%20step-by-step%20process.%20The%20notebook%20has%20three%20sections%3A%20Create%20a%20Predictive%20...&amp;source=Dato"><i class="fa fa-linkedin fa-lg"></i></a></li>
+    <li><a target="_blank" href="https://www.facebook.com/sharer.php?u=https%3A//dato.com%7B%7B%20glcom_url%20%7D%7D/learn/notebooks/deploy-scikit-learn-in-ps.html&amp;e=Dato%3A%20Deploy%20scikit-learn%20models%20in%20Dato%20Predictive%20Services"><i class="fa fa-facebook fa-lg"></i></a></li>
+  </ul>
+            </div>
+          </div>
+          <div class="visible-xs col-xs-12 cml-nb-userbar-right">
+            
+            <ul class="nav nav-pills cml-nb-userbar-sharing">
+    <li><a target="_blank" href="https://twitter.com/share?url=https%3A//dato.com%7B%7B%20glcom_url%20%7D%7D/learn/notebooks/deploy-scikit-learn-in-ps.html"><i class="fa fa-twitter fa-lg"></i></a></li>
+    <li><a target="_blank" href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A//dato.com%7B%7B%20glcom_url%20%7D%7D/learn/notebooks/deploy-scikit-learn-in-ps.html&amp;title=Deploy%20scikit-learn%20models%20in%20Dato%20Predictive%20Services&amp;summary=Deploy%20scikit-learn%20model%20with%20Dato%20Predictive%20Services%C2%B6%20Deploying%20models%20created%20using%20scikit-learn%20in%20a%20Dato%20Predictive%20Service%20is%20very%20easy.%20This%20notebook%20walks%20you%20through%20the%20step-by-step%20process.%20The%20notebook%20has%20three%20sections%3A%20Create%20a%20Predictive%20...&amp;source=Dato"><i class="fa fa-linkedin fa-lg"></i></a></li>
+    <li><a target="_blank" href="https://www.facebook.com/sharer.php?u=https%3A//dato.com%7B%7B%20glcom_url%20%7D%7D/learn/notebooks/deploy-scikit-learn-in-ps.html&amp;e=Dato%3A%20Deploy%20scikit-learn%20models%20in%20Dato%20Predictive%20Services"><i class="fa fa-facebook fa-lg"></i></a></li>
+  </ul>
+          </div>
+        </div>
+      </div>
+      <div class="cml-notebook-area">
+        <div class="cml-notebook-contents">
+          
+          
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Deploy-scikit-learn-model-with-Dato-Predictive-Services">Deploy scikit-learn model with Dato Predictive Services<a class="anchor-link" href="#Deploy-scikit-learn-model-with-Dato-Predictive-Services">&#182;</a></h1>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Deploying models created using scikit-learn in a Dato Predictive Service is very easy. This notebook walks you through the step-by-step process. The notebook has three sections: </p>
+<ol>
+<li><a href='#createps'>Create a Predictive Service</a></li>
+<li><a href='#deploymodel'>Create a scikit-learn model and deploy it to a Predictive Service</a></li>
+<li><a href='#queryps'>Query the model through CURL or a Predictive Service Client</a></li>
+</ol>
+<p>If you are deploying a model in an existing Predictive Service instance you can go to <a href='#deploymodel'>step two</a> directly.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Prerequisites">Prerequisites<a class="anchor-link" href="#Prerequisites">&#182;</a></h2>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Apart from GraphLab Create you will, naturally, need scikit-learn installed in your current Python environment. The most straightforward way to do that is to use conda:</p>
+<pre><code>conda install scikit-learn
+</code></pre><p>You will also need a valid AWS account in order to set up a predictive service.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Step-one:-Create-a-Predictive-Service-">Step one: Create a Predictive Service <a id="createps" /><a class="anchor-link" href="#Step-one:-Create-a-Predictive-Service-">&#182;</a></h2>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This section shows you how to deploy a Predictive Service to EC2. The EC2 instances used by the Predictive Service will be launched in your own AWS account, so you will be responsible for the cost. </p>
+<p>To create a Predictive Service in Amazon AWS, we first configure the EC2 Config object, which contains the configuration parameters required for launching a Predictive Service cluster in EC2. These fields are optional and include the region, instance type, CIDR rules etc. Predictive Service uses this configuration for service creation.</p>
+<p>Having configured our EC2 Config object, we&#39;re ready to launch a Predictive Service Deployment, There are a few aspects of the Predictive Service that can be customized:</p>
+<ul>
+<li>Number of nodes in the service - By default the number of hosts (<code>num_hosts</code>) is 1. To obtain good cache utility and high availability, we recommended setting num_hosts to at least 3.</li>
+<li>State path to persist service state and service logs. This is a s3 location. </li>
+<li>Port to be used by the server.</li>
+<li>Other settings, such as SSL credentials etc.</li>
+</ul>
+<p>The following code snippet shows you how to create a Predictive Service. You will have to replace the ps_state_path and credentials for your Predictive Service.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">graphlab</span> <span class="kn">as</span> <span class="nn">gl</span>
+
+<span class="c"># make sure to replace the following with your own information</span>
+<span class="n">ps_state_path</span> <span class="o">=</span> <span class="s">&#39;s3://&lt;your-bucket-name&gt;/predictive_service/ps&#39;</span>
+
+<span class="c"># Create an EC2 config</span>
+<span class="c"># You can either specify your AWS credentials using environment variables, or</span>
+<span class="c"># set them as arguments to this object&#39;s constructor</span>
+<span class="n">ec2_config</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">deploy</span><span class="o">.</span><span class="n">Ec2Config</span><span class="p">(</span>
+    <span class="n">aws_access_key_id</span><span class="o">=</span><span class="s">&#39;&lt;your access key&gt;&#39;</span><span class="p">,</span>
+    <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="s">&#39;&lt;your secret key&gt;&#39;</span><span class="p">)</span>
+
+<span class="c"># use the EC2 config to launch a new Predictive Service</span>
+<span class="c"># num_hosts specifies how many hosts the Predictive Service cluster has. You can scale up and down later after initial creation.</span>
+<span class="n">ps</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">deploy</span><span class="o">.</span><span class="n">predictive_service</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">&#39;sklearn-predictive-service&#39;</span><span class="p">,</span>
+    <span class="n">ec2_config</span><span class="o">=</span><span class="n">ec2_config</span><span class="p">,</span>
+    <span class="n">state_path</span><span class="o">=</span><span class="n">ps_state_path</span><span class="p">,</span>
+    <span class="n">num_hosts</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="c"># once the Predictive Service is successfully created, you can query the service status</span>
+<span class="n">ps</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[5]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>
+[{u&apos;cache&apos;: {u&apos;healthy&apos;: True, u&apos;num_keys&apos;: 0, u&apos;type&apos;: u&apos;local&apos;},
+  u&apos;dns_name&apos;: u&apos;ec2-52-34-231-117.us-west-2.compute.amazonaws.com&apos;,
+  u&apos;id&apos;: u&apos;i-992d1540&apos;,
+  u&apos;models&apos;: [],
+  u&apos;num_hosts&apos;: 1,
+  u&apos;reason&apos;: u&apos;N/A&apos;,
+  u&apos;service_version&apos;: u&apos;1.7.1&apos;,
+  u&apos;state&apos;: u&apos;InService&apos;}]
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Step-two:-Create-a-scikit-learn-model-and-deploy-to-Predictive-Service-">Step two: Create a scikit-learn model and deploy to Predictive Service <a id="deploymodel" /><a class="anchor-link" href="#Step-two:-Create-a-scikit-learn-model-and-deploy-to-Predictive-Service-">&#182;</a></h2>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let&#39;s train a simple random forest model and deploy it in the Predictive Service</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="n">X</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">clf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">clf</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can expose the trained model as a REST endpoint in the Predictive Service. This will allow other applications to consume the predictions from the model. </p>
+<p>In order to do that, we wrap the model object in a Python function and add it to the Predictive Service. In the function you may add your own logic for transform input to the model, ensemble different models or manipulate output before returning. Checkout our <a href="https://dato.com/learn/userguide/deployment/pred-working-with-objects.html">user guide</a> for more details.</p>
+<p>The result of the function needs to be  a JSON serializable object.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">prediction</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c"># convert into a json serializable value</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+
+<span class="c"># add your predictive function that wraps scikit-learn model</span>
+<span class="n">ps</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;classify&#39;</span><span class="p">,</span> <span class="n">classify</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You may do a test query before really deploying it to production. This will help detect errors in the function before deploying it the Predictive Service. </p>
+<p>The response to a query is a JSON object with the following keys:</p>
+<pre><code>* response: is the actual response from the query;
+* uuid: is the unique identifier for your query. The &#39;uuid&#39; is useful when you need to correlated the query with other data you potentially have for future model tuning.
+* version: is the model version. This is useful when you are updating model and you want to know exactly which version served your query
+</code></pre>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">ps</span><span class="o">.</span><span class="n">test_query</span><span class="p">(</span><span class="s">&#39;classify&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[8]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>
+{u&apos;response&apos;: [0, 1],
+ u&apos;uuid&apos;: u&apos;9277467f-fc55-40ee-8125-403f95660840&apos;,
+ u&apos;version&apos;: 1}
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It is as expected, let us apply the changes and the predictive model is ready to go!</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="c"># This will push the custom query to the Predictive Service. Since the update is asynchronous, you may need to wait </span>
+<span class="c"># a little while before the model is fully deployed.</span>
+<span class="n">ps</span><span class="o">.</span><span class="n">apply_changes</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Check status and make sure the deployed custom predictive object is fully operational:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="c"># There are other variable way of query status, check API document for more details</span>
+<span class="n">ps</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="s">&#39;model&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[10]:</div>
+
+<div class="output_html rendered_html output_subarea output_pyout">
+<div style="max-height:1000px;max-width:1500px;overflow:auto;"><table frame="box" rules="cols">
+    <tr>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">name</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">expected version</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">type</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">reason</th>
+        <th style="padding-left: 1em; padding-right: 1em; text-align: center">node.i-992d1540</th>
+    </tr>
+    <tr>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">classify</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">model</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">N/A</td>
+        <td style="padding-left: 1em; padding-right: 1em; text-align: center; vertical-align: top">1 (Loaded successfully)</td>
+    </tr>
+</table>
+[? rows x 5 columns]<br/>Note: Only the head of the SFrame is printed. This SFrame is lazily evaluated.<br/>You can use len(sf) to force materialization.
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="c"># test query to make sure the model works fine</span>
+<span class="n">ps</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s">&#39;classify&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[11]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>
+{u&apos;from_cache&apos;: False,
+ u&apos;model&apos;: u&apos;classify&apos;,
+ u&apos;response&apos;: [0, 1],
+ u&apos;uuid&apos;: u&apos;05c773c5-a3e0-4783-bca6-a8925fb20a0c&apos;,
+ u&apos;version&apos;: 1}
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now other applications can interact with our model! In the next section we will illustrate how to consume the model. We can also use other APIs like <code>ps.update()</code> to update a model and <code>ps.remove()</code> to remove a model.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Dato Predictive Services includes a stand-alone Python client for those who just want to query a running service. We will show you how to use the client in the following section. The client takes a configuration file containing the endpoint of the Predictive Service and API key used by client. You can generate the Python client configuration using the following call and hand off the configuration file to your consumer.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="c"># Generate a client configuration file for Predictive Service Client to consume</span>
+<span class="c"># It is a good practice to config a CNAME entry in your DNS provider to have a well known endpoint</span>
+<span class="c"># like https://models.companyname.com to point to the Predictive Service so that the consumer of</span>
+<span class="c"># the Predictive Service do not need to change their code when you make modifications to your</span>
+<span class="c"># Predictive Service</span>
+<span class="c"># Here we use None only for demo purpose</span>
+<span class="n">ps</span><span class="o">.</span><span class="n">save_client_config</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="s">&#39;/tmp/ps_client.conf&#39;</span><span class="p">,</span> <span class="n">predictive_service_cname</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Once generated, the ps_client.conf file may be passed along to your client side developer. We will show you how to use the file in next section.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Step-three:-query-the-model-through-REST-api-and-Python-client-">Step three: query the model through REST api and Python client <a id="queryps" /><a class="anchor-link" href="#Step-three:-query-the-model-through-REST-api-and-Python-client-">&#182;</a></h2>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Query-through-REST">Query through REST<a class="anchor-link" href="#Query-through-REST">&#182;</a></h3>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The model query is exposed through REST API. The endpoints URL is:</p>
+<pre><code>http(s)://&lt;your-ps-endpoint-base&gt;/query/&lt;model-name&gt;
+</code></pre><p>You can find out the endpoint URL base by simply printing the <code>ps</code> object, and copying the <em>Load Balancer DNS Name</em>.</p>
+<p>The HTTP call for querying a model or method is  a POST call, requiring a JSON-serialized string in the following format as payload:</p>
+<pre><code>{ &quot;data&quot;: &lt;parameters to model or custom method&gt; }
+</code></pre><p>You also need a valid API key, which you can retreive through <code>ps.api_key</code>.</p>
+<p>Here is a sample curl command to query the <code>classify</code> method that we deployed in this notebook:</p>
+<pre><code>curl -u api_key:&lt;your-api-key&gt; -d &#39;{&quot;data&quot;: {&quot;x&quot;: [[0,0],[1,1]]}}&#39;
+    http://&lt;your-ps-endpoint-base&gt;/query/classify
+</code></pre>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Query-through-Python">Query through Python<a class="anchor-link" href="#Query-through-Python">&#182;</a></h3>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We also ship a Python client package that you may easily consume the model. To install the package, do:</p>
+<pre><code>pip install GraphLab-Service-Client  
+</code></pre><p>After that you may consume the Predictive Model:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">graphlab_service_client</span> <span class="kn">import</span> <span class="n">PredictiveServiceClient</span>
+
+<span class="c"># the configuration is saved through ps.save_client_config()</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">PredictiveServiceClient</span><span class="p">(</span><span class="n">config_file</span><span class="o">=</span><span class="s">&#39;/tmp/ps_client.conf&#39;</span><span class="p">)</span>
+
+<span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s">&#39;classify&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[14]:</div>
+
+
+<div class="output_text output_subarea output_pyout">
+<pre>
+{u&apos;from_cache&apos;: True,
+ u&apos;model&apos;: u&apos;classify&apos;,
+ u&apos;response&apos;: [0, 1],
+ u&apos;uuid&apos;: u&apos;661f8381-e01c-414c-9fe6-4738bfaa28c2&apos;,
+ u&apos;version&apos;: 1}
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Shutting-down-the-predictive-service">Shutting down the predictive service<a class="anchor-link" href="#Shutting-down-the-predictive-service">&#182;</a></h2>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If you don&#39;t need to keep you predictive service around for further tasks, make sure to terminate it to avoid incurring unnecessary costs:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">ps</span><span class="o">.</span><span class="n">terminate_service</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Where-to-go-from-here">Where to go from here<a class="anchor-link" href="#Where-to-go-from-here">&#182;</a></h2>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This notebook gives you a peek at what Dato Predictive Service can offer. For a more detailed look at the functionalities in the Dato Predictive Service, checkout out <a href="http://dato.com/learn/userguide/#Deployment">user guide</a> for more details. If you have any questions, post it in our <a href="http://forum.dato.com">forum</a> and we are happy to assist you!</p>
+</div>
+</div>
+</div>
+        </div>
+      </div>
+      <div id="vanilla-comments"></div>
+      <script type="text/javascript">
+        var vanilla_forum_url = 'http://forum.dato.com';
+        var vanilla_identifier = 'deploy-scikit-learn-in-ps';
+        var vanilla_category_id = 'graphlab-notebooks';
+        $(function() {
+          var vanilla = document.createElement('script');
+          vanilla.type = 'text/javascript';
+          var timestamp = new Date().getTime();
+          vanilla.src = vanilla_forum_url + '/js/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(vanilla);
+        });
+      </script>
+      <noscript>Please enable JavaScript to view the <a href="http://vanillaforums.com/?ref_noscript">comments powered by Vanilla.</a></noscript>
+
+    
+  </div>
+</div>
+
+    </div>
+  </div>
+  
+    <div id="footer"><div style="margin-top:40px;" data-reactid=".18oej0038xs" data-react-checksum="304520137"><footer style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;" data-reactid=".18oej0038xs.0"><div data-reactid=".18oej0038xs.0.$=10:0"><div style="background-color:#6E6868;padding:20px 0;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0"><div style="padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto;box-sizing:border-box;@media (min-width: 768px):[object Object];@media (min-width: 992px):[object Object];@media (min-width: 1200px):[object Object];" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0"><div style="width:25%;display:inline-block;float:left;position:relative;border-left:1px solid #b9b9b7;min-height:1px;padding-right:15px;padding-left:15px;box-sizing:border-box;@media (max-width: 768px):[object Object];" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0"><h3 style="text-transform:uppercase;color:#b9b9b7;font-size:18px;font-weight:300;margin:auto ;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=10:0">About Dato</h3><ul style="list-style:none;padding:0;margin-top:5px;margin-bottom:20px;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0"><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=10:0"><a href="https://dato.com/company/team/index.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=10:0.0">Team</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=11:0"><a href="http://blog.dato.com/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=11:0.0">Blog</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=12:0"><a href="https://dato.com/company/careers/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=12:0.0">Careers</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=13:0"><a href="https://dato.com/company/team/investors.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=13:0.0">Investors</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=14:0"><a href="https://dato.com/company/press/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=14:0.0">Press</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=15:0"><a href="https://dato.com/user-research/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=11:0.$=15:0.0">User Research</a></li></ul><h3 style="text-transform:uppercase;color:#b9b9b7;font-size:18px;font-weight:300;margin:auto ;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=12:0">Contact Us</h3><ul style="list-style:none;padding:0;margin-top:5px;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=13:0"><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=13:0.$=10:0"><a href="https://dato.com/company/contact.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=13:0.$=10:0.0">Contact Sales</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=13:0.$=11:0"><a href="https://dato.com/support/create-support-ticket.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=13:0.$=11:0.0">Contact Support</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=13:0.$=12:0"><a href="https://dato.com/download/academic.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=10:0.$=13:0.$=12:0.0">Request Academic Use</a></li></ul></div><div style="width:25%;display:inline-block;float:left;position:relative;border-left:1px solid #b9b9b7;min-height:1px;padding-right:15px;padding-left:15px;box-sizing:border-box;@media (max-width: 768px):[object Object];" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0"><h3 style="text-transform:uppercase;color:#b9b9b7;font-size:18px;font-weight:300;margin:auto ;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=10:0">Products</h3><ul style="list-style:none;padding:0;margin-top:5px;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0"><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=10:0"><a href="https://dato.com/products/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=10:0.0">Dato Machine Learning Platform</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=11:0"><a href="https://dato.com/products/create/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=11:0.0">GraphLab Create</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=12:0"><a href="https://dato.com/products/predictive-services/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=12:0.0">Dato Predictive Services</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=13:0"><a href="https://dato.com/products/distributed/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=13:0.0">Dato Distributed</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=14:0"><a href="https://dato.com/buy/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=11:0.$=14:0.0">Plans and Pricing</a></li></ul><a href="https://dato.com/download/" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;background-color:#85bd00;border-radius:0;border-style:solid;border-width:1px;border-color:#85bd00;color:#ffffff;font-size:14px;margin-top:auto;margin-bottom:auto;margin-left:0;margin-right:0;padding:6px 30px;text-decoration:none;text-transform:uppercase;transition:background-color 0.2s;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=11:0.$=12:0">try it free</a></div><div style="width:25%;display:inline-block;float:left;position:relative;border-left:1px solid #b9b9b7;min-height:1px;padding-right:15px;padding-left:15px;box-sizing:border-box;@media (max-width: 768px):[object Object];" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0"><h3 style="text-transform:uppercase;color:#b9b9b7;font-size:18px;font-weight:300;margin:auto ;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=10:0">Algorithms</h3><ul style="list-style:none;padding:0;margin-top:5px;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0"><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=10:0"><a href="https://dato.com/solutions/machine-learning-algorithms/recommender.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=10:0.0">Recommender</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=11:0"><a href="https://dato.com/solutions/machine-learning-algorithms/classifier.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=11:0.0">Classifier</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=12:0"><a href="https://dato.com/solutions/machine-learning-algorithms/clustering.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=12:0.0">Clustering</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=13:0"><a href="https://dato.com/solutions/machine-learning-algorithms/data-matching.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=13:0.0">Data Matching</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=14:0"><a href="https://dato.com/solutions/machine-learning-algorithms/deep-learning.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=14:0.0">Deep Learning</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=15:0"><a href="https://dato.com/solutions/machine-learning-algorithms/logistic-regression.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=15:0.0">Logistic Regression</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=16:0"><a href="https://dato.com/solutions/machine-learning-algorithms/nearest-neighbor.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=16:0.0">Nearest Neighbors</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=17:0"><a href="https://dato.com/solutions/machine-learning-algorithms/text-analysis.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=12:0.$=11:0.$=17:0.0">Text Analysis</a></li></ul></div><div style="width:25%;display:inline-block;float:left;position:relative;border-left:1px solid #b9b9b7;min-height:1px;padding-right:15px;padding-left:15px;box-sizing:border-box;@media (max-width: 768px):[object Object];" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0"><h3 style="text-transform:uppercase;color:#b9b9b7;font-size:18px;font-weight:300;margin:auto ;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=10:0">Use Cases</h3><ul style="list-style:none;padding:0;margin-top:5px;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0"><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=10:0"><a href="https://dato.com/solutions/use-cases/recommendation-engine.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=10:0.0">Recommendation Engine</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=11:0"><a href="https://dato.com/solutions/use-cases/customer-churn.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=11:0.0">Customer Churn</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=12:0"><a href="https://dato.com/solutions/use-cases/customer-segmentation.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=12:0.0">Customer Segmentation</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=13:0"><a href="https://dato.com/solutions/use-cases/fraud-detection.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=13:0.0">Fraud Detection</a></li><li data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=14:0"><a href="https://dato.com/solutions/use-cases/sentiment-analysis.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:white;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=13:0.$=11:0.$=14:0.0">Sentiment Analysis</a></li></ul></div><div style="content:px;visibility:hidden;display:block;height:0;clear:both;" data-reactid=".18oej0038xs.0.$=10:0.$=10:0.0.$=14:0"></div></div></div><div style="background-color:#4B4C4D;padding:20px 0;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0"><div style="padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto;box-sizing:border-box;@media (min-width: 768px):[object Object];@media (min-width: 992px):[object Object];@media (min-width: 1200px):[object Object];" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0"><div style="width:50%;display:inline-block;float:left;position:relative;min-height:1px;padding-right:15px;padding-left:15px;box-sizing:border-box;@media (max-width: 768px):[object Object];" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0"><h3 style="text-transform:uppercase;color:#b9b9b7;font-size:18px;font-weight:300;margin:auto ;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=10:0">Connect with us</h3><ul class="nav nav-pills gl-footer-socialbuttons" style="padding:0;margin-bottom:0;margin-top:0;list-style:none;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0"><li style="background-color:#a8a8a8;margin:3px 10px 15px 0;display:inline-block;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=10:0"><a href="https://twitter.com/datoinc" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:#fff;text-decoration:none;border-radius:0;padding:5px;width:30px;height:30px;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=10:0.0"><i class="fa fa-twitter" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=10:0.0.0"></i></a></li><li style="background-color:#a8a8a8;margin:3px 10px 15px 0;display:inline-block;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=11:0"><a href="http://www.linkedin.com/company/dato" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:#fff;text-decoration:none;border-radius:0;padding:5px;width:30px;height:30px;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=11:0.0"><i class="fa fa-linkedin" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=11:0.0.0"></i></a></li><li style="background-color:#a8a8a8;margin:3px 10px 15px 0;display:inline-block;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=12:0"><a href="https://www.facebook.com/datoinc" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:#fff;text-decoration:none;border-radius:0;padding:5px;width:30px;height:30px;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=12:0.0"><i class="fa fa-facebook" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=12:0.0.0"></i></a></li><li style="background-color:#a8a8a8;margin:3px 10px 15px 0;display:inline-block;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=13:0"><a href="https://www.youtube.com/channel/UCqP3XX03Rl_nQAz0eqXXAYw" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:#fff;text-decoration:none;border-radius:0;padding:5px;width:30px;height:30px;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=13:0.0"><i class="fa fa-youtube" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=13:0.0.0"></i></a></li><li style="background-color:#a8a8a8;margin:3px 10px 15px 0;display:inline-block;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=14:0"><a href="https://plus.google.com/+DatoInc" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:#fff;text-decoration:none;border-radius:0;padding:5px;width:30px;height:30px;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=14:0.0"><i class="fa fa-google-plus" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=14:0.0.0"></i></a></li><li style="background-color:#a8a8a8;margin:3px 10px 15px 0;display:inline-block;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=15:0"><a href="http://blog.dato.com/rss.xml" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:#fff;text-decoration:none;border-radius:0;padding:5px;width:30px;height:30px;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=15:0.0"><i class="fa fa-rss" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=10:0.$=11:0.$=15:0.0.0"></i></a></li></ul></div><div style="width:50%;display:inline-block;float:left;position:relative;min-height:1px;padding-right:15px;padding-left:15px;box-sizing:border-box;@media (max-width: 768px):[object Object];" class="hbspt-form" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=11:0"><h3 style="text-transform:uppercase;color:#b9b9b7;font-size:18px;font-weight:300;margin:auto ;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=11:0.$=10:0">Subscribe to our data science blog</h3><div id="hubspotform" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=11:0.$=11:0"><div data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=11:0.$=11:0.0"></div></div></div><div style="content:px;visibility:hidden;display:block;height:0;clear:both;" data-reactid=".18oej0038xs.0.$=10:0.$=11:0.0.$=12:0"></div></div></div><div style="background-color:#2F2B2A;padding:20px 0;" data-reactid=".18oej0038xs.0.$=10:0.$=12:0"><div style="padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto;box-sizing:border-box;@media (min-width: 768px):[object Object];@media (min-width: 992px):[object Object];@media (min-width: 1200px):[object Object];" data-reactid=".18oej0038xs.0.$=10:0.$=12:0.0"><span style="font-size:10px;color:white;box-sizing:border-box;" data-reactid=".18oej0038xs.0.$=10:0.$=12:0.0.0"><span data-reactid=".18oej0038xs.0.$=10:0.$=12:0.0.0.$=10:0">© 2015 Dato · All Rights Reserved. No part of this website may be reproduced without Dato&#x27;s expressed consent. Dato, GraphLab, GraphLab Create and logos are property of Dato.   </span><a href="https://dato.com/legal/privacy_policy.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:#0A8CC4;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=12:0.0.0.$=11:0">Privacy Policy</a><span data-reactid=".18oej0038xs.0.$=10:0.$=12:0.0.0.$=12:0">  |  </span><a href="https://dato.com/legal/terms_of_use.html" style="font-family:&#x27;museo-sans&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif;font-weight:300;line-height:1.5em;letter-spacing:.01em;font-smoothing:subpixel-antialiased;color:#0A8CC4;text-decoration:none;" data-reactid=".18oej0038xs.0.$=10:0.$=12:0.0.0.$=13:0">Terms of Use</a></span></div></div></div><div style="height:3px;width:100%;overflow:hidden;" data-reactid=".18oej0038xs.0.$=11:0"><div style="width:20%;height:3px;display:inline-block;float:left;background-color:#B0007F;" data-reactid=".18oej0038xs.0.$=11:0.$=10:0"></div><div style="width:20%;height:3px;display:inline-block;float:left;background-color:#0A8CC4;" data-reactid=".18oej0038xs.0.$=11:0.$=11:0"></div><div style="width:20%;height:3px;display:inline-block;float:left;background-color:#85BD00;" data-reactid=".18oej0038xs.0.$=11:0.$=12:0"></div><div style="width:20%;height:3px;display:inline-block;float:left;background-color:#FF5500;" data-reactid=".18oej0038xs.0.$=11:0.$=13:0"></div><div style="width:20%;height:3px;display:inline-block;float:left;background-color:#5E5555;" data-reactid=".18oej0038xs.0.$=11:0.$=14:0"></div><div style="content:px;visibility:hidden;display:block;height:0;clear:both;" data-reactid=".18oej0038xs.0.$=11:0.$=15:0"></div></div></footer></div></div>
+  
+
+  </body>
+</html>
